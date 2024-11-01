@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopGridController;
 use App\Http\Controllers\ProductDetailController;
@@ -15,13 +17,12 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
+
 Route::get('/shopgrid', [ShopGridController::class, 'index'])->name('user.shop-grid.index');
 Route::get('/productdetail', action: [ProductDetailController::class, 'index'])->name('user.product-detail.index');
 Route::get('/checkout', action: [CheckOutController::class, 'index'])->name('user.checkout.index');
 Route::get('/shopping-cart', action: [ShoppingCartController::class, 'index'])->name('user.shopping-cart.index');
-Route::get('/login', action: [AuthController::class, 'login'])->name('auth.login.index');
-Route::get('/register', action: [AuthController::class, 'register'])->name('auth.register.index');
 Route::get('/blog', action: [BlogController::class, 'index'])->name('user.blog.index');
 Route::get('/blog-details', action: [BlogController::class, 'blogdetail'])->name('user.blog-details.index');
 
@@ -67,3 +68,23 @@ Route::prefix('admin/users')->name('admin.users.')->group(function () {
 
 // Trang cài đặt
 Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
+
+// Đăng ký
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('auth.register.index');
+Route::post('/register', [AuthController::class, 'register'])->name('auth.register.store');
+
+// Đăng nhập
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('auth.login.index');
+Route::post('/login', [AuthController::class, 'login'])->name('auth.login.store');
+
+// Quên mật khẩu
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Đặt lại mật khẩu
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
+// Đăng xuất
+Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');

@@ -5,25 +5,83 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use stdClass;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\NguoiDung;
 
 class AuthController extends Controller
 {
-    // Register API - POST (name, email, password)
-    public function register()
+    // Hiển thị form đăng ký
+    public function showRegisterForm()
     {
-        return view(view: 'auth.register.index');
-
+        return view('auth.register.index');
     }
 
-    // Login API - POST (email, password)
-    public function login()
+    // Xử lý đăng ký người dùng
+    public function register(Request $request)
     {
-        return view(view: 'auth.login.index');
+        // Xác thực dữ liệu đầu vào
+        $request->validate([
+            'ten_dang_nhap' => 'required|unique:NguoiDung,TenDangNhap',
+            'mat_khau' => 'required|min:6|confirmed',
+            'email' => 'required|email|unique:NguoiDung,Email',
+            'ho_ten' => 'required',
+        ]);
+
+        // Tạo người dùng mới
+        $nguoiDung = new NguoiDung();
+        $nguoiDung->TenDangNhap = $request->ten_dang_nhap;
+        $nguoiDung->MatKhau = Hash::make($request->mat_khau);
+        $nguoiDung->Email = $request->email;
+        $nguoiDung->HoTen = $request->ho_ten;
+        $nguoiDung->MaVaiTro = 1; // Vai trò Khách hàng
+        $nguoiDung->save();
+
+        // Đăng nhập người dùng
+        Auth::login($nguoiDung);
+
+        // Chuyển hướng đến trang chủ
+        return redirect()->route('auth.login.index');
     }
+
+    // Hiển thị form đăng nhập
+    public function showLoginForm()
+    {
+        return view('auth.login.index');
+    }
+
+    // Xử lý đăng nhập người dùng
+    public function login(Request $request)
+    {
+        // Xác thực dữ liệu đầu vào
+        $request->validate([
+            'ten_dang_nhap' => 'required',
+            'mat_khau' => 'required',
+        ]);
+
+        // Thử đăng nhập
+        if (
+            Auth::attempt([
+                'TenDangNhap' => $request->ten_dang_nhap,
+                'password' => $request->mat_khau
+            ])
+        ) {
+            // Đăng nhập thành công
+            return redirect()->route('welcome');
+        } else {
+            // Đăng nhập thất bại
+            return back()->withErrors([
+                'ten_dang_nhap' => 'Tên đăng nhập hoặc mật khẩu không đúng.',
+            ]);
+        }
+    }
+
+    // Xử lý đăng xuất
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('auth.login.index');
+    }
+
 }

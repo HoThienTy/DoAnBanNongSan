@@ -22,8 +22,29 @@
             </ul>
         </div>
         <div class="header__top__right__auth">
-            <a href="{{ route('auth.login.index') }}"><i class="fa fa-user"></i> Login</a>
+            @if (Auth::check())
+                <div class="header__top__right__language">
+                    <div>{{ Auth::user()->HoTen }}</div> 
+                    <span class="arrow_carrot-down"></span>
+                    <ul>
+                        <li><a href="#">Quản lý tài khoản</a></li>
+                        <li>
+                            <a href="{{ route('auth.logout') }}"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                Đăng xuất
+                            </a>
+                            <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
+                                style="display: none;">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            @else
+                <a href="{{ route('auth.login.index') }}"><i class="fa fa-user"></i> Login</a>
+            @endif
         </div>
+
     </div>
     <nav class="humberger__menu__nav mobile-menu">
         <ul>
@@ -88,7 +109,27 @@
                             </ul>
                         </div>
                         <div class="header__top__right__auth">
-                            <a href="{{ route('auth.login.index') }}"><i class="fa fa-user"></i> Login</a>
+                            @if (Auth::check())
+                                <div class="header__top__right__language">
+                                    <div>{{ Auth::user()->HoTen }}</div> 
+                                    <span class="arrow_carrot-down"></span>
+                                    <ul>
+                                        <li><a href="#">Quản lý tài khoản</a></li>
+                                        <li>
+                                            <a href="{{ route('auth.logout') }}"
+                                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                                Đăng xuất
+                                            </a>
+                                            <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            @else
+                                <a href="{{ route('auth.login.index') }}"><i class="fa fa-user"></i> Login</a>
+                            @endif
                         </div>
                     </div>
                 </div>
