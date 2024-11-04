@@ -62,41 +62,53 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách danh mục</h1>
-                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mb-3">Thêm danh mục</a>
-
-                @if (session('success'))
+                <h1>Quản lý sản phẩm bị hủy</h1>
+            
+                @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
+                @elseif(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
                 @endif
-
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mã danh mục</th>
-                            <th>Tên danh mục</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $category)
+            
+                <a href="{{ route('admin.cancellation.create') }}" class="btn btn-primary mb-3">Ghi nhận sản phẩm bị hủy</a>
+            
+                {{-- Kiểm tra nếu có dữ liệu --}}
+                @if($cancellations->isEmpty())
+                    <p>Không có sản phẩm nào bị hủy.</p>
+                @else
+                    <table class="table table-bordered">
+                        <thead>
                             <tr>
-                                <td>{{ $category->MaDanhMuc }}</td>
-                                <td>{{ $category->TenDanhMuc }}</td>
+                                <th>Mã hủy</th>
+                                <th>Sản phẩm</th>
+                                <th>Lô hàng</th>
+                                <th>Số lượng</th>
+                                <th>Ngày hủy</th>
+                                <th>Lý do</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($cancellations as $cancellation)
+                            <tr>
+                                <td>{{ $cancellation->ma_huy }}</td>
+                                <td>{{ $cancellation->sanPham->TenSanPham ?? 'Không có sản phẩm' }}</td>
+                                <td>{{ $cancellation->loHang->ma_lo_hang ?? 'Không có lô hàng' }}</td>
+                                <td>{{ $cancellation->so_luong }}</td>
+                                <td>{{ $cancellation->ngay_huy }}</td>
+                                <td>{{ $cancellation->ly_do }}</td>
                                 <td>
-                                    <a href="{{ route('admin.categories.edit', $category->MaDanhMuc) }}"
-                                        class="btn btn-warning">Chỉnh sửa</a>
-                                    <form action="{{ route('admin.categories.destroy', $category->MaDanhMuc) }}"
-                                        method="POST" style="display:inline-block;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
+                                    <form action="{{ route('admin.cancellation.destroy', $cancellation->ma_huy) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông tin hủy này?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger">Xóa</button>
                                     </form>
                                 </td>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
             </div>
         </div>
         <!--**********************************

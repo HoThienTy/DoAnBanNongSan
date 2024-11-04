@@ -23,7 +23,6 @@
 
     @include('layouts.vendor-admin-css')
 </head>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <body>
 
@@ -60,48 +59,50 @@
         <!--**********************************
             Content body start
         ***********************************-->
-        <div class="content-body card">
+        <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách sản phẩm</h1>
-                <a href="{{ route('admin.products.create') }}" class="btn btn-primary mb-3">Thêm sản phẩm</a>
+                <h1>Quản lý kho hàng</h1>
             
-                <!-- Form tìm kiếm -->
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="basic-form">
-                            <form id="searchForm">
-                                <div class="row">
-                                    <div class="col-sm-4">
-                                        <input type="text" name="TenSanPham" id="searchName" class="form-control" placeholder="Tìm kiếm theo tên" value="{{ $searchName ?? '' }}">
-                                    </div>
-                                    <div class="col-sm-4 mt-2 mt-sm-0">
-                                        <input type="text" name="MaSanPham" id="searchCode" class="form-control" placeholder="Tìm kiếm theo mã" value="{{ $searchCode ?? '' }}">
-                                    </div>
-                                    <div class="col-sm-4 mt-2 mt-sm-0">
-                                        <select name="MaDanhMuc" id="searchCategory" class="form-control">
-                                            <option value="">-- Chọn danh mục --</option>
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->MaDanhMuc }}" {{ isset($searchCategory) && $searchCategory == $category->MaDanhMuc ? 'selected' : '' }}>
-                                                    {{ $category->TenDanhMuc }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            
-                <!-- Thông báo thành công nếu có -->
                 @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
             
-                <!-- Bảng danh sách sản phẩm -->
-                <div id="productTable">
-                    @include('admin.products.product_table', ['products' => $products])
+                @if(!empty($warnings))
+                    <div class="alert alert-warning">
+                        <h4>Cảnh báo kho hàng</h4>
+                        <ul>
+                            @foreach($warnings as $warning)
+                                <li>{{ $warning }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            
+                <!-- Form tìm kiếm -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form id="searchForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="searchName">Tên sản phẩm</label>
+                                    <input type="text" name="TenSanPham" id="searchName" class="form-control" placeholder="Nhập tên sản phẩm" value="{{ $searchName ?? '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="searchCode">Mã sản phẩm</label>
+                                    <input type="text" name="MaSanPham" id="searchCode" class="form-control" placeholder="Nhập mã sản phẩm" value="{{ $searchCode ?? '' }}">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" id="searchButton" class="btn btn-primary">Tìm kiếm</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            
+                <!-- Bảng danh sách kho hàng -->
+                <div id="warehouseTable">
+                    @include('admin.warehouse.warehouse_table', ['products' => $products])
                 </div>
             </div>
         </div>
@@ -120,6 +121,9 @@
     @include('layouts.vendor-admin-js')
     <script>
         $(document).ready(function() {
+            // Khởi tạo tooltip
+            $('[data-toggle="tooltip"]').tooltip();
+    
             // Hàm debounce để giảm số lần gửi yêu cầu
             function debounce(func, wait) {
                 let timeout;
@@ -132,37 +136,38 @@
             }
     
             // Hàm gửi yêu cầu AJAX
-            function fetchProducts() {
+            function fetchWarehouses() {
                 var name = $('#searchName').val();
                 var code = $('#searchCode').val();
-                var category = $('#searchCategory').val();
     
                 $.ajax({
-                    url: '{{ route('admin.products.search') }}',
+                    url: '{{ route('admin.warehouse.search') }}',
                     type: 'GET',
                     data: {
                         TenSanPham: name,
                         MaSanPham: code,
-                        MaDanhMuc: category,
                     },
                     success: function(response) {
-                        // Cập nhật bảng sản phẩm
-                        $('#productTable').html(response.html);
+                        // Cập nhật bảng kho hàng
+                        $('#warehouseTable').html(response.html);
+                        // Khởi tạo lại tooltip cho nội dung mới
+                        $('[data-toggle="tooltip"]').tooltip();
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
+                        alert('Có lỗi xảy ra. Vui lòng thử lại.');
                     }
                 });
             }
     
-            // Gọi hàm fetchProducts khi người dùng nhập vào ô tìm kiếm với debounce
+            // Gọi hàm fetchWarehouses khi người dùng nhập vào ô tìm kiếm với debounce
             $('#searchName, #searchCode').on('keyup', debounce(function() {
-                fetchProducts();
+                fetchWarehouses();
             }, 500));
     
-            // Gọi hàm fetchProducts khi người dùng thay đổi lựa chọn trong combobox
-            $('#searchCategory').on('change', function() {
-                fetchProducts();
+            // Gọi hàm fetchWarehouses khi người dùng nhấn nút tìm kiếm
+            $('#searchButton').on('click', function() {
+                fetchWarehouses();
             });
         });
     </script>

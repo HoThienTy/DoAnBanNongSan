@@ -62,41 +62,58 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách danh mục</h1>
-                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mb-3">Thêm danh mục</a>
-
-                @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                @endif
-
+                <h1>Chi tiết lô hàng - {{ $batch->ma_lo_hang }}</h1>
+            
                 <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mã danh mục</th>
-                            <th>Tên danh mục</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $category)
-                            <tr>
-                                <td>{{ $category->MaDanhMuc }}</td>
-                                <td>{{ $category->TenDanhMuc }}</td>
-                                <td>
-                                    <a href="{{ route('admin.categories.edit', $category->MaDanhMuc) }}"
-                                        class="btn btn-warning">Chỉnh sửa</a>
-                                    <form action="{{ route('admin.categories.destroy', $category->MaDanhMuc) }}"
-                                        method="POST" style="display:inline-block;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <td>{{ $batch->sanPham->TenSanPham }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ngày nhập</th>
+                        <td>{{ $batch->ngay_nhap }}</td>
+                    </tr>
+                    <tr>
+                        <th>Hạn sử dụng</th>
+                        <td>{{ $batch->han_su_dung }}</td>
+                    </tr>
+                    <tr>
+                        <th>Số lượng</th>
+                        <td>{{ $batch->so_luong }}</td>
+                    </tr>
+                    <tr>
+                        <th>Giá nhập</th>
+                        <td>{{ number_format($batch->gia_nhap, 0, ',', '.') }} đ</td>
+                    </tr>
+                    <tr>
+                        <th>Khuyến mãi</th>
+                        <td>{{ $batch->trang_thai_khuyen_mai ?? 'Không có' }}</td>
+                    </tr>
                 </table>
+            
+                <h3>Sản phẩm bị hủy trong lô hàng này</h3>
+                @if($batch->huy->isEmpty())
+                    <p>Không có sản phẩm bị hủy.</p>
+                @else
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Số lượng</th>
+                                <th>Ngày hủy</th>
+                                <th>Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($batch->huy as $cancellation)
+                            <tr>
+                                <td>{{ $cancellation->so_luong }}</td>
+                                <td>{{ $cancellation->ngay_huy }}</td>
+                                <td>{{ $cancellation->ly_do }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
             </div>
         </div>
         <!--**********************************
@@ -112,6 +129,8 @@
         Scripts
     ***********************************-->
     @include('layouts.vendor-admin-js')
+
+    
 </body>
 
 </html>

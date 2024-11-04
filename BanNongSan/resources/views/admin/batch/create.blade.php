@@ -62,41 +62,51 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách danh mục</h1>
-                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mb-3">Thêm danh mục</a>
-
-                @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
+                <h1>Thêm lô hàng mới</h1>
+            
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
-
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mã danh mục</th>
-                            <th>Tên danh mục</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $category)
-                            <tr>
-                                <td>{{ $category->MaDanhMuc }}</td>
-                                <td>{{ $category->TenDanhMuc }}</td>
-                                <td>
-                                    <a href="{{ route('admin.categories.edit', $category->MaDanhMuc) }}"
-                                        class="btn btn-warning">Chỉnh sửa</a>
-                                    <form action="{{ route('admin.categories.destroy', $category->MaDanhMuc) }}"
-                                        method="POST" style="display:inline-block;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            
+                <form action="{{ route('admin.batch.store') }}" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="ma_san_pham">Sản phẩm</label>
+                        <select name="ma_san_pham" class="form-control" required>
+                            <option value="">-- Chọn sản phẩm --</option>
+                            @foreach($products as $product)
+                                <option value="{{ $product->MaSanPham }}">{{ $product->TenSanPham }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ngay_nhap">Ngày nhập</label>
+                        <input type="date" name="ngay_nhap" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="han_su_dung">Hạn sử dụng</label>
+                        <input type="date" name="han_su_dung" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="so_luong">Số lượng</label>
+                        <input type="number" name="so_luong" class="form-control" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="gia_nhap">Giá nhập</label>
+                        <input type="number" name="gia_nhap" class="form-control" required min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="trang_thai_khuyen_mai">Trạng thái khuyến mãi</label>
+                        <input type="text" name="trang_thai_khuyen_mai" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Thêm lô hàng</button>
+                </form>
             </div>
         </div>
         <!--**********************************

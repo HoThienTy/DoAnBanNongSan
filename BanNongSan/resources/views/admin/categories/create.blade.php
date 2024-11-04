@@ -62,41 +62,27 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách danh mục</h1>
-                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mb-3">Thêm danh mục</a>
+                <h1>Thêm danh mục</h1>
 
-                @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
 
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mã danh mục</th>
-                            <th>Tên danh mục</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $category)
-                            <tr>
-                                <td>{{ $category->MaDanhMuc }}</td>
-                                <td>{{ $category->TenDanhMuc }}</td>
-                                <td>
-                                    <a href="{{ route('admin.categories.edit', $category->MaDanhMuc) }}"
-                                        class="btn btn-warning">Chỉnh sửa</a>
-                                    <form action="{{ route('admin.categories.destroy', $category->MaDanhMuc) }}"
-                                        method="POST" style="display:inline-block;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <form action="{{ route('admin.categories.store') }}" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="TenDanhMuc">Tên danh mục</label>
+                        <input type="text" name="TenDanhMuc" class="form-control" value="{{ old('TenDanhMuc') }}"
+                            required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Thêm danh mục</button>
+                </form>
             </div>
         </div>
         <!--**********************************

@@ -16,3 +16,4 @@
 <script src="{{ asset('assets_admin/js/dlabnav-init.js') }}"></script>
 <script src="{{ asset('assets_admin/js/demo.js') }}"></script>
 <script src="{{ asset('assets_admin/js/styleSwitcher.js') }}"></script>
+<!-- Thêm vào trước thẻ </body> -->

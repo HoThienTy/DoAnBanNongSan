@@ -3,42 +3,65 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\DanhMucSanPham;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        // Hiển thị danh sách danh mục
-        return view('admin.categories.index');
+        // Lấy danh sách danh mục
+        $categories = DanhMucSanPham::all();
+        return view('admin.categories.index', compact('categories'));
     }
 
     public function create()
     {
-        // Hiển thị form thêm danh mục mới
-        return view('admin.category_create');
+        // Hiển thị form tạo danh mục
+        return view('admin.categories.create');
     }
 
     public function store(Request $request)
     {
-        // Xử lý lưu danh mục mới vào cơ sở dữ liệu
-        return redirect()->route('admin.categories.index');
+        // Validate dữ liệu
+        $request->validate([
+            'TenDanhMuc' => 'required|max:100|unique:danhmucsanpham,TenDanhMuc',
+        ]);
+
+        // Tạo mới danh mục
+        DanhMucSanPham::create([
+            'TenDanhMuc' => $request->TenDanhMuc,
+        ]);
+
+        return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được thêm thành công');
     }
 
     public function edit($id)
     {
-        // Hiển thị form chỉnh sửa danh mục
-        return view('admin.category_edit', compact('id'));
+        // Lấy thông tin danh mục
+        $category = DanhMucSanPham::findOrFail($id);
+        return view('admin.categories.edit', compact('category'));
     }
 
     public function update(Request $request, $id)
     {
-        // Xử lý cập nhật danh mục
-        return redirect()->route('admin.categories.index');
+        // Validate dữ liệu
+        $request->validate([
+            'TenDanhMuc' => 'required|max:100|unique:danhmucsanpham,TenDanhMuc,' . $id . ',MaDanhMuc',
+        ]);
+
+        // Cập nhật danh mục
+        $category = DanhMucSanPham::findOrFail($id);
+        $category->update([
+            'TenDanhMuc' => $request->TenDanhMuc,
+        ]);
+
+        return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được cập nhật');
     }
 
     public function destroy($id)
     {
         // Xóa danh mục
-        return redirect()->route('admin.categories.index');
+        DanhMucSanPham::destroy($id);
+        return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được xóa');
     }
 }

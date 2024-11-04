@@ -14,6 +14,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckPermission;
+use App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\CancellationController;
+use App\Http\Controllers\BatchController;
+use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\DeliveryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,39 +38,96 @@ Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboa
 
 // Quản lý sản phẩm
 Route::prefix('admin/products')->name('admin.products.')->group(function () {
-    Route::get('/', [ProductController::class, 'index'])->name('index');
-    Route::get('/create', [ProductController::class, 'create'])->name('create');
-    Route::post('/store', [ProductController::class, 'store'])->name('store');
-    Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [ProductController::class, 'update'])->name('update');
-    Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy');
+    Route::get('/', [ProductController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
+    Route::get('/create', [ProductController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
+    Route::post('/store', [ProductController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
+    Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
+    Route::put('/{id}', [ProductController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
+    Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
+
+    // Thêm route cho tìm kiếm sản phẩm bằng AJAX
+    Route::get('/search', [ProductController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
 });
+
 
 // Quản lý danh mục
 Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
-    Route::get('/', [CategoryController::class, 'index'])->name('index');
-    Route::get('/create', [CategoryController::class, 'create'])->name('create');
-    Route::post('/store', [CategoryController::class, 'store'])->name('store');
-    Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
-    Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+    Route::get('/', [CategoryController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý danh mục');
+    Route::get('/create', [CategoryController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý danh mục');
+    Route::post('/store', [CategoryController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý danh mục');
+    Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý danh mục');
+    Route::put('/{id}', [CategoryController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý danh mục');
+    Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý danh mục');
+});
+
+
+// Quản lý kho hàng
+// Quản lý kho hàng
+Route::prefix('admin/warehouse')->name('admin.warehouse.')->middleware('auth')->group(function () {
+    Route::get('/', [WarehouseController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    
+    // Đặt route '/search' trước route '/{id}'
+    Route::get('/search', [WarehouseController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    
+    Route::get('/{id}', [WarehouseController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::post('/{id}/adjust', [WarehouseController::class, 'adjustStock'])->name('adjust')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::post('/{id}/set-minimum', [WarehouseController::class, 'setMinimumLevel'])->name('set-minimum')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+});
+
+
+Route::prefix('admin/batches')->name('admin.batch.')->middleware('auth')->group(function () {
+    Route::get('/', [BatchController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::get('/create', [BatchController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::post('/store', [BatchController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::get('/{id}', [BatchController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::delete('/{id}', [BatchController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+});
+
+Route::prefix('admin/cancellations')->name('admin.cancellation.')->middleware('auth')->group(function () {
+    Route::get('/', [CancellationController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::get('/create', [CancellationController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::post('/store', [CancellationController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::delete('/{id}', [CancellationController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+});
+
+Route::prefix('admin/promotions')->name('admin.promotions.')->middleware('auth')->group(function () {
+    Route::get('/', [PromotionController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::get('/create', [PromotionController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::post('/store', [PromotionController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::put('/{id}', [PromotionController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
 });
 
 // Quản lý đơn hàng
-Route::prefix('admin/orders')->name('admin.orders.')->group(function () {
-    Route::get('/', [OrderController::class, 'index'])->name('index');
-    Route::get('/{id}', [OrderController::class, 'show'])->name('show');
-    Route::put('/{id}', [OrderController::class, 'update'])->name('update');
-    Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+// Quản lý đơn hàng
+Route::prefix('admin/orders')->name('admin.orders.')->middleware('auth')->group(function () {
+    Route::get('/', [OrderController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý đơn hàng');
+    Route::get('/{id}', [OrderController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý đơn hàng');
+    Route::put('/{id}', [OrderController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý đơn hàng');
+    Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý đơn hàng');
 });
 
-// Quản lý người dùng
-Route::prefix('admin/users')->name('admin.users.')->group(function () {
-    Route::get('/', [UserController::class, 'index'])->name('index');
-    Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [UserController::class, 'update'])->name('update');
-    Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+// Quản lý giao hàng
+Route::prefix('admin/delivery')->name('admin.delivery.')->middleware('auth')->group(function () {
+    Route::get('/', [DeliveryController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý giao hàng');
+    Route::post('/{id}/assign', [DeliveryController::class, 'assignDeliveryPerson'])->name('assign')->middleware(CheckPermission::class . ':Quản lý giao hàng');
+    Route::post('/{id}/update-status', [DeliveryController::class, 'updateStatus'])->name('update-status')->middleware(CheckPermission::class . ':Quản lý giao hàng');
 });
+
+Route::prefix('admin')->middleware(CheckPermission::class . ':Quản lý người dùng')->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    Route::prefix('users')->name('admin.users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Xem danh sách người dùng');
+        Route::get('/create', [UserController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý người dùng');
+        Route::post('/', [UserController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý người dùng');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý người dùng');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý người dùng');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý người dùng');
+    });
+});
+
 
 // Trang cài đặt
 Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');

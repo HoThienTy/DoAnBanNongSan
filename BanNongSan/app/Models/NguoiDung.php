@@ -26,6 +26,11 @@ class NguoiDung extends Authenticatable implements CanResetPasswordContract
     protected $hidden = [
         'MatKhau',
     ];
+    
+    public function vaiTro()
+    {
+        return $this->belongsTo(Vaitro::class, 'MaVaiTro', 'MaVaiTro');
+    }
 
     // Để Laravel sử dụng cột 'MatKhau' cho mật khẩu
     public function getAuthPassword()
@@ -55,5 +60,10 @@ class NguoiDung extends Authenticatable implements CanResetPasswordContract
     public function getNameAttribute()
     {
         return $this->HoTen;
+    }
+
+    public function quyen()
+    {
+        return $this->vaiTro->quyen();
     }
 }

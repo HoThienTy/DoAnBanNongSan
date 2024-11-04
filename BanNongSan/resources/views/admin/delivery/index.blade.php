@@ -63,14 +63,14 @@
         <div class="content-body card">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Quản lý đơn hàng</h1>
+                <h1>Quản lý giao hàng</h1>
             
                 @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
             
                 @if($orders->isEmpty())
-                    <p>Không có đơn hàng nào.</p>
+                    <p>Không có đơn hàng cần giao.</p>
                 @else
                     <table class="table table-bordered">
                         <thead>
@@ -79,6 +79,7 @@
                                 <th>Khách hàng</th>
                                 <th>Ngày đặt</th>
                                 <th>Tổng tiền</th>
+                                <th>Nhân viên giao hàng</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
@@ -90,13 +91,35 @@
                                 <td>{{ $order->khachHang->HoTen }}</td>
                                 <td>{{ $order->ngay_dat }}</td>
                                 <td>{{ $order->tong_tien }}</td>
+                                <td>{{ $order->nhanVien->nguoiDung->HoTen ?? 'Chưa phân công' }}</td>
                                 <td>{{ $order->trang_thai }}</td>
                                 <td>
                                     <a href="{{ route('admin.orders.show', $order->ma_hoa_don) }}" class="btn btn-info">Xem</a>
-                                    <form action="{{ route('admin.orders.destroy', $order->ma_hoa_don) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                                    @if(!$order->ma_nhan_vien)
+                                    <form action="{{ route('admin.delivery.assign', $order->ma_hoa_don) }}" method="POST" class="d-inline-block">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
+                                        <div class="form-group">
+                                            <label for="ma_nhan_vien">Chọn nhân viên:</label>
+                                            <select name="ma_nhan_vien" class="form-control">
+                                                <!-- Lấy danh sách nhân viên giao hàng -->
+                                                @foreach($deliveryPersons as $nhanVien)
+                                                    <option value="{{ $nhanVien->MaNhanVien }}">{{ $nhanVien->nguoiDung->HoTen }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Phân công</button>
+                                    </form>
+                                    @endif
+                                    <form action="{{ route('admin.delivery.update-status', $order->ma_hoa_don) }}" method="POST" class="d-inline-block">
+                                        @csrf
+                                        <div class="form-group">
+                                            <label for="trang_thai">Trạng thái:</label>
+                                            <select name="trang_thai" class="form-control">
+                                                <option value="Đang giao hàng" @if($order->trang_thai == 'Đang giao hàng') selected @endif>Đang giao hàng</option>
+                                                <option value="Đã giao" @if($order->trang_thai == 'Đã giao') selected @endif>Đã giao</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Cập nhật</button>
                                     </form>
                                 </td>
                             </tr>

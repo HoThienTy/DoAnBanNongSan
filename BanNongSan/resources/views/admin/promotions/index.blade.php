@@ -62,41 +62,49 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách danh mục</h1>
-                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mb-3">Thêm danh mục</a>
-
-                @if (session('success'))
+                <h1>Quản lý chương trình khuyến mãi</h1>
+            
+                @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
-
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mã danh mục</th>
-                            <th>Tên danh mục</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $category)
+            
+                <a href="{{ route('admin.promotions.create') }}" class="btn btn-primary mb-3">Thêm chương trình khuyến mãi</a>
+            
+                @if($promotions->isEmpty())
+                    <p>Không có chương trình khuyến mãi nào.</p>
+                @else
+                    <table class="table table-bordered">
+                        <thead>
                             <tr>
-                                <td>{{ $category->MaDanhMuc }}</td>
-                                <td>{{ $category->TenDanhMuc }}</td>
+                                <th>Mã khuyến mãi</th>
+                                <th>Tên khuyến mãi</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Mô tả</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($promotions as $promotion)
+                            <tr>
+                                <td>{{ $promotion->ma_khuyen_mai }}</td>
+                                <td>{{ $promotion->ten_khuyen_mai }}</td>
+                                <td>{{ $promotion->ngay_bat_dau }}</td>
+                                <td>{{ $promotion->ngay_ket_thuc }}</td>
+                                <td>{{ $promotion->mo_ta }}</td>
                                 <td>
-                                    <a href="{{ route('admin.categories.edit', $category->MaDanhMuc) }}"
-                                        class="btn btn-warning">Chỉnh sửa</a>
-                                    <form action="{{ route('admin.categories.destroy', $category->MaDanhMuc) }}"
-                                        method="POST" style="display:inline-block;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
+                                    <a href="{{ route('admin.promotions.edit', $promotion->ma_khuyen_mai) }}" class="btn btn-warning">Sửa</a>
+                                    <form action="{{ route('admin.promotions.destroy', $promotion->ma_khuyen_mai) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger">Xóa</button>
                                     </form>
                                 </td>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
             </div>
         </div>
         <!--**********************************

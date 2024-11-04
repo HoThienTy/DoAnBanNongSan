@@ -59,43 +59,39 @@
         <div class="content-body">
             <!-- row -->
 			<div class="container-fluid">
-                <h4 class="card-title">Danh sách người dùng</h4>
-                {{-- @if(in_array('Quản lý người dùng', Auth::user()->quyen->pluck('TenQuyen')->toArray()))
-                    <a href="{{ route('admin.users.create') }}" class="btn btn-primary mb-3">Thêm người dùng</a>
-                @endif --}}
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Tên đăng nhập</th>
-                            <th>Email</th>
-                            <th>Họ tên</th>
-                            <th>Vai trò</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($users as $user)
-                            <tr>
-                                <td>{{ $user->TenDangNhap }}</td>
-                                <td>{{ $user->Email }}</td>
-                                <td>{{ $user->HoTen }}</td>
-                                <td>{{ $user->vaiTro->TenVaiTro }}</td>
-                                <td>
-                                    @if(in_array('Quản lý người dùng', Auth::user()->quyen->pluck('TenQuyen')->toArray()))
-                                        <a href="{{ route('admin.users.edit', $user->MaNguoiDung) }}" class="btn btn-sm btn-warning">Sửa</a>
-                                        <form action="{{ route('admin.users.destroy', $user->MaNguoiDung) }}" method="POST" style="display:inline-block;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">Xóa</button>
-                                        </form>
-                                    @else
-                                        <span class="text-muted">Không có quyền</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <h4 class="card-title">Thêm người dùng mới</h4>
+                <form action="{{ route('admin.users.store') }}" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label>Tên đăng nhập</label>
+                        <input type="text" name="TenDangNhap" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <input type="password" name="MatKhau" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="Email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Họ tên</label>
+                        <input type="text" name="HoTen" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Vai trò</label>
+                        <select name="MaVaiTro" class="form-control" required>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->MaVaiTro }}">{{ $role->TenVaiTro }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div style="margin: 20px; text-align: center;">
+                        <button type="submit" class="btn btn-success">Lưu</button>
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Quay lại</a>
+                    </div>
+                    
+                </form>
             </div>
         </div>
         <!--**********************************

@@ -2,7 +2,7 @@
     <div class="dlabnav-scroll">
         <ul class="metismenu" id="menu">
             <li class="dropdown header-profile">
-                @if(Auth::check())
+                @if (Auth::check())
                     <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
                         <img src="{{ asset('images/profile/pic1.jpg') }}" width="20" alt="">
                         <div class="header-info ms-3">
@@ -16,11 +16,12 @@
                             <span class="ms-2">Profile</span>
                         </a>
                         <a href="#" class="dropdown-item ai-icon"
-                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <!-- Icon -->
                             <span class="ms-2">Logout</span>
                         </a>
-                        <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" style="display: none;">
+                        <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
+                            style="display: none;">
                             @csrf
                         </form>
                     </div>
@@ -34,7 +35,7 @@
                     </a>
                 @endif
             </li>
-            
+
             <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="flaticon-025-dashboard"></i>
                     <span class="nav-text">Dashboard</span>
@@ -52,14 +53,14 @@
             </li>
             <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="flaticon-050-info"></i>
-                    <span class="nav-text">Quản Lý Người Dùng</span>
+                    <span class="nav-text">Quản Lý Người Dùng</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="app-profile.html">Danh Sách Người Dùng</a></li>
-                    <li><a href="post-details.html">Post Details</a></li>
-                    <li><a href="app-calender.html">Calendar</a></li>
+                    <li><a href="{{ route('admin.users.index') }}">Danh Sách Người Dùng</a></li>
+                    <li><a href="{{ route('admin.users.create') }}">Thêm Người Dùng</a></li>
                 </ul>
             </li>
+
             <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="flaticon-041-graph"></i>
                     <span class="nav-text">Báo Cáo Thống Kê</span>
@@ -73,65 +74,89 @@
                     <li><a href="chart-peity.html">Peity</a></li>
                 </ul>
             </li>
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-086-star"></i>
-                    <span class="nav-text">Quản Lý Đơn Hàng</span>
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="flaticon-381-networking"></i>
+                    <span class="nav-text">Quản Lý Đơn Hàng</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="ui-accordion.html">Accordion</a></li>
-                    <li><a href="ui-alert.html">Alert</a></li>
-                    <li><a href="ui-badge.html">Badge</a></li>
-                    <li><a href="ui-button.html">Button</a></li>
-                    <li><a href="ui-modal.html">Modal</a></li>
-                    <li><a href="ui-button-group.html">Button Group</a></li>
-                    <li><a href="ui-list-group.html">List Group</a></li>
-                    <li><a href="ui-card.html">Cards</a></li>
-                    <li><a href="ui-carousel.html">Carousel</a></li>
-                    <li><a href="ui-dropdown.html">Dropdown</a></li>
-                    <li><a href="ui-popover.html">Popover</a></li>
-                    <li><a href="ui-progressbar.html">Progressbar</a></li>
-                    <li><a href="ui-tab.html">Tab</a></li>
-                    <li><a href="ui-typography.html">Typography</a></li>
-                    <li><a href="ui-pagination.html">Pagination</a></li>
-                    <li><a href="ui-grid.html">Grid</a></li>
-
+                    <li><a href="{{ route('admin.orders.index') }}">Danh sách đơn hàng</a></li>
                 </ul>
             </li>
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+            
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="flaticon-381-folder"></i>
+                    <span class="nav-text">Quản Lý Giao Hàng</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('admin.delivery.index') }}">Danh sách giao hàng</a></li>
+                </ul>
+            </li>
+            
+            <li><a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
                     <i class="flaticon-045-heart"></i>
-                    <span class="nav-text">Quản Lý Sản Phẩm</span>
+                    <span class="nav-text">Quản Lý Sản Phẩm</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="uc-select2.html">Select 2</a></li>
-                    <li><a href="uc-nestable.html">Nestedable</a></li>
-                    <li><a href="uc-noui-slider.html">Noui Slider</a></li>
-                    <li><a href="uc-sweetalert.html">Sweet Alert</a></li>
-                    <li><a href="uc-toastr.html">Toastr</a></li>
-                    <li><a href="map-jqvmap.html">Jqv Map</a></li>
-                    <li><a href="uc-lightgallery.html">Light Gallery</a></li>
+                    <li><a href="{{ route('admin.products.index') }}">Danh sách sản phẩm</a></li>
+                    <li><a href="{{ route('admin.products.create') }}">Thêm sản phẩm</a></li>
                 </ul>
             </li>
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-072-printer"></i>
-                    <span class="nav-text">Quản Lý Danh Mục</span>
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+                    <i class="flaticon-013-checkmark"></i>
+                    <span class="nav-text">Quản Lý Danh Mục</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="form-element.html">Form Elements</a></li>
-                    <li><a href="form-wizard.html">Wizard</a></li>
-                    <li><a href="form-ckeditor.html">CkEditor</a></li>
-                    <li><a href="form-pickers.html">Pickers</a></li>
-                    <li><a href="form-validation.html">Form Validate</a></li>
+                    <li><a href="{{ route('admin.categories.index') }}">Danh sách danh mục</a></li>
+                    <li><a href="{{ route('admin.categories.create') }}">Thêm danh mục</a></li>
                 </ul>
             </li>
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+                    <i class="flaticon-013-checkmark"></i>
+                    <span class="nav-text">Quản Lý Kho</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('admin.warehouse.index') }}">Danh sách kho hàng</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+                    <i class="flaticon-381-list"></i>
+                    <span class="nav-text">Quản Lý Lô Hàng</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('admin.batch.index') }}">Danh sách lô hàng</a></li>
+                    <li><a href="{{ route('admin.batch.create') }}">Thêm lô hàng mới</a></li>
+                </ul>
+            </li>
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+                    <i class="flaticon-381-error"></i>
+                    <span class="nav-text">Quản Lý Hủy Hàng</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('admin.cancellation.index') }}">Danh sách hủy hàng</a></li>
+                    <li><a href="{{ route('admin.cancellation.create') }}">Ghi nhận hủy hàng</a></li>
+                </ul>
+            </li>
+            
+            
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="flaticon-043-menu"></i>
-                    <span class="nav-text">Quản Lý Kho</span>
+                    <span class="nav-text">Quản Lý Khuyến Mãi</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="table-bootstrap-basic.html">Bootstrap</a></li>
-                    <li><a href="table-datatable-basic.html">Datatable</a></li>
+                    <li><a href="{{ route('admin.promotions.index') }}">Danh sách khuyến mãi</a></li>
+                    <li><a href="{{ route('admin.promotions.create') }}">Thêm khuyến mãi</a></li>
                 </ul>
             </li>
+            
             <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="flaticon-022-copy"></i>
                     <span class="nav-text">Pages</span>

@@ -62,38 +62,46 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách danh mục</h1>
-                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary mb-3">Thêm danh mục</a>
-
-                @if (session('success'))
+                <h1>Quản lý lô hàng</h1>
+            
+                @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
-
+            
+                <a href="{{ route('admin.batch.create') }}" class="btn btn-primary mb-3">Thêm lô hàng mới</a>
+            
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Mã danh mục</th>
-                            <th>Tên danh mục</th>
+                            <th>Mã lô hàng</th>
+                            <th>Sản phẩm</th>
+                            <th>Ngày nhập</th>
+                            <th>Hạn sử dụng</th>
+                            <th>Số lượng</th>
+                            <th>Giá nhập</th>
+                            <th>Khuyến mãi</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($categories as $category)
-                            <tr>
-                                <td>{{ $category->MaDanhMuc }}</td>
-                                <td>{{ $category->TenDanhMuc }}</td>
-                                <td>
-                                    <a href="{{ route('admin.categories.edit', $category->MaDanhMuc) }}"
-                                        class="btn btn-warning">Chỉnh sửa</a>
-                                    <form action="{{ route('admin.categories.destroy', $category->MaDanhMuc) }}"
-                                        method="POST" style="display:inline-block;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
+                        @foreach($batches as $batch)
+                        <tr>
+                            <td>{{ $batch->ma_lo_hang }}</td>
+                            <td>{{ $batch->sanPham->TenSanPham }}</td>
+                            <td>{{ $batch->ngay_nhap }}</td>
+                            <td>{{ $batch->han_su_dung }}</td>
+                            <td>{{ $batch->so_luong }}</td>
+                            <td>{{ number_format($batch->gia_nhap, 0, ',', '.') }} đ</td>
+                            <td>{{ $batch->trang_thai_khuyen_mai ?? 'Không có' }}</td>
+                            <td>
+                                <a href="{{ route('admin.batch.show', $batch->ma_lo_hang) }}" class="btn btn-info">Chi tiết</a>
+                                <form action="{{ route('admin.batch.destroy', $batch->ma_lo_hang) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lô hàng này?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>
