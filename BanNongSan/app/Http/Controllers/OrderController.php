@@ -11,11 +11,26 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = HoaDon::with('khachHang', 'nhanVien')->get();
+        $query = HoaDon::with('khachHang', 'nhanVien');
+
+        // Tìm kiếm
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('ma_hoa_don', 'LIKE', "%$search%")
+                ->orWhere('tong_tien', 'LIKE', "%$search%")
+                ->orWhereHas('khachHang', function ($q) use ($search) {
+                    $q->where('TenKhachHang', 'LIKE', "%$search%");
+                });
+        }
+
+        // Phân trang, mỗi trang hiển thị 10 đơn hàng
+        $orders = $query->orderBy('ngay_dat', 'desc')->paginate(10);
+
         return view('admin.orders.index', compact('orders'));
     }
+
 
     public function show($id)
     {

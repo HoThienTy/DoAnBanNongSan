@@ -62,53 +62,58 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Quản lý sản phẩm bị hủy</h1>
-            
-                @if(session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                @elseif(session('error'))
-                    <div class="alert alert-danger">{{ session('error') }}</div>
-                @endif
-            
-                <a href="{{ route('admin.cancellation.create') }}" class="btn btn-primary mb-3">Ghi nhận sản phẩm bị hủy</a>
-            
-                {{-- Kiểm tra nếu có dữ liệu --}}
-                @if($cancellations->isEmpty())
-                    <p>Không có sản phẩm nào bị hủy.</p>
-                @else
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Mã hủy</th>
-                                <th>Sản phẩm</th>
-                                <th>Lô hàng</th>
-                                <th>Số lượng</th>
-                                <th>Ngày hủy</th>
-                                <th>Lý do</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($cancellations as $cancellation)
-                            <tr>
-                                <td>{{ $cancellation->ma_huy }}</td>
-                                <td>{{ $cancellation->sanPham->TenSanPham ?? 'Không có sản phẩm' }}</td>
-                                <td>{{ $cancellation->loHang->ma_lo_hang ?? 'Không có lô hàng' }}</td>
-                                <td>{{ $cancellation->so_luong }}</td>
-                                <td>{{ $cancellation->ngay_huy }}</td>
-                                <td>{{ $cancellation->ly_do }}</td>
-                                <td>
-                                    <form action="{{ route('admin.cancellation.destroy', $cancellation->ma_huy) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông tin hủy này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
+                <h4 class="card-title">Chỉnh sửa thông tin người dùng</h4>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
                             @endforeach
-                        </tbody>
-                    </table>
+                        </ul>
+                    </div>
                 @endif
+
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <form action="{{ route('admin.users.update', $user->MaNguoiDung) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-group">
+                        <label>Tên đăng nhập</label>
+                        <input type="text" name="TenDangNhap" class="form-control" value="{{ $user->TenDangNhap }}"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu mới (để trống nếu không thay đổi)</label>
+                        <input type="password" name="MatKhau" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="Email" class="form-control" value="{{ $user->Email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Họ tên</label>
+                        <input type="text" name="HoTen" class="form-control" value="{{ $user->HoTen }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Vai trò</label>
+                        <select name="MaVaiTro" class="form-control" required>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->MaVaiTro }}"
+                                    {{ $user->MaVaiTro == $role->MaVaiTro ? 'selected' : '' }}>{{ $role->TenVaiTro }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div style="margin: 20px; text-align: center;">
+                        <button type="submit" class="btn btn-success">Cập nhật</button>
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Quay lại</a>
+                    </div>
+                </form>
             </div>
         </div>
         <!--**********************************

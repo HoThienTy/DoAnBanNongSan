@@ -10,10 +10,12 @@ class UserController extends Controller
 {
     public function index()
     {
-        // Lấy danh sách người dùng và phân quyền
-        $users = NguoiDung::with('vaiTro')->get();
+        // Lấy danh sách người dùng và phân quyền, phân trang 12 người dùng mỗi trang
+        $users = NguoiDung::with('vaiTro')->paginate(5);
         return view('admin.users.index', compact('users'));
     }
+
+
 
     public function create()
     {
@@ -65,10 +67,18 @@ class UserController extends Controller
             'MaVaiTro' => 'required|exists:vaitro,MaVaiTro'
         ]);
 
-        $user->update($request->only('TenDangNhap', 'Email', 'HoTen', 'MaVaiTro'));
+        $data = $request->only('TenDangNhap', 'Email', 'HoTen', 'MaVaiTro');
+
+        // Nếu có nhập mật khẩu mới
+        if ($request->filled('MatKhau')) {
+            $data['MatKhau'] = bcrypt($request->MatKhau);
+        }
+
+        $user->update($data);
 
         return redirect()->route('admin.users.index')->with('success', 'Thông tin người dùng đã được cập nhật');
     }
+
 
     public function destroy($id)
     {
@@ -76,4 +86,5 @@ class UserController extends Controller
         NguoiDung::destroy($id);
         return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được xóa');
     }
+
 }

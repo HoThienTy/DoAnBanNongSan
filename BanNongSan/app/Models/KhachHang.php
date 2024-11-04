@@ -11,11 +11,10 @@ class KhachHang extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'MaNguoiDung',
-        'HoTen',
-        'Email',
+        'TenKhachHang',
+        'SoDienThoai',
         'DiaChi',
-        // Thêm các cột khác nếu cần
+        'MaNguoiDung',
     ];
 
     // Quan hệ với model NguoiDung

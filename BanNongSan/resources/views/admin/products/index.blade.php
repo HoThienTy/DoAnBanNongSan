@@ -37,7 +37,7 @@
             Nav header start
         ***********************************-->
         <div class="nav-header">
-            <a href="index.html" class="brand-logo">
+            <a href="{{ route('admin.dashboard') }}" class="brand-logo">
                 <svg width="150" height="40" xmlns="http://www.w3.org/2000/svg">
                     <text x="0" y="30" font-size="30" fill="rgb(25, 59, 98)"
                         font-family="Arial, sans-serif">Organi</text>
@@ -60,12 +60,10 @@
         <!--**********************************
             Content body start
         ***********************************-->
-        <div class="content-body card">
+        <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Danh sách sản phẩm</h1>
-                <a href="{{ route('admin.products.create') }}" class="btn btn-primary mb-3">Thêm sản phẩm</a>
-            
+                <h1>Danh sách sản phẩm</h1>            
                 <!-- Form tìm kiếm -->
                 <div class="card mb-3">
                     <div class="card-body">
@@ -132,13 +130,13 @@
             }
     
             // Hàm gửi yêu cầu AJAX
-            function fetchProducts() {
+            function fetchProducts(page = 1) {
                 var name = $('#searchName').val();
                 var code = $('#searchCode').val();
                 var category = $('#searchCategory').val();
     
                 $.ajax({
-                    url: '{{ route('admin.products.search') }}',
+                    url: '{{ route('admin.products.search') }}' + '?page=' + page,
                     type: 'GET',
                     data: {
                         TenSanPham: name,
@@ -164,8 +162,16 @@
             $('#searchCategory').on('change', function() {
                 fetchProducts();
             });
+    
+            // Xử lý sự kiện khi nhấn vào liên kết phân trang
+            $(document).on('click', '.pagination a', function(event) {
+                event.preventDefault();
+                var page = $(this).attr('href').split('page=')[1];
+                fetchProducts(page);
+            });
         });
     </script>
+    
 </body>
 
 </html>

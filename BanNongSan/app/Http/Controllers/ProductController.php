@@ -37,7 +37,7 @@ class ProductController extends Controller
         }
 
         // Thực hiện query và lấy kết quả
-        $products = $query->get();
+        $products = $query->paginate(10);
 
         // Trả về view với dữ liệu
         return view('admin.products.index', compact('products', 'searchName', 'searchCode', 'searchCategory', 'categories'));
@@ -140,6 +140,20 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được cập nhật');
     }
 
+    public function show($MaSanPham)
+    {
+        // Lấy thông tin sản phẩm
+        $product = SanPham::findOrFail($MaSanPham);
+
+        // Lấy các sản phẩm liên quan (ví dụ: cùng danh mục)
+        $relatedProducts = SanPham::where('MaDanhMuc', $product->MaDanhMuc)
+            ->where('MaSanPham', '!=', $MaSanPham)
+            ->take(4)
+            ->get();
+
+        return view('user.product-detail.index', compact('product', 'relatedProducts'));
+    }
+
     public function destroy($id)
     {
         $product = SanPham::findOrFail($id);
@@ -179,8 +193,8 @@ class ProductController extends Controller
             $query->where('MaDanhMuc', $searchCategory);
         }
 
-        // Thực hiện query và lấy kết quả
-        $products = $query->get();
+        // Thêm phân trang
+        $products = $query->paginate(10);
 
         // Render view partial
         $html = view('admin.products.product_table', compact('products'))->render();
@@ -188,5 +202,6 @@ class ProductController extends Controller
         // Trả về kết quả dưới dạng JSON
         return response()->json(['html' => $html]);
     }
+
 
 }

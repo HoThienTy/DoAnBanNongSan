@@ -6,10 +6,10 @@
     </div>
     <div class="humberger__menu__cart">
         <ul>
-            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
-            <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
+            <li><a href="#"><i class="fa fa-heart"></i> <span>0</span></a></li>
+            <li><a href="{{ route('cart.index') }}"><i class="fa fa-shopping-bag"></i> <span>{{ $cartCount }}</span></a></li>
         </ul>
-        <div class="header__cart__price">item: <span>$150.00</span></div>
+        <div class="header__cart__price">Tổng: <span>{{ number_format($cartTotal, 0, ',', '.') }} VNĐ</span></div>
     </div>
     <div class="humberger__menu__widget">
         <div class="header__top__right__language">
@@ -24,7 +24,7 @@
         <div class="header__top__right__auth">
             @if (Auth::check())
                 <div class="header__top__right__language">
-                    <div>{{ Auth::user()->HoTen }}</div> 
+                    <div>{{ Auth::user()->HoTen }}</div>
                     <span class="arrow_carrot-down"></span>
                     <ul>
                         <li><a href="#">Quản lý tài khoản</a></li>
@@ -48,13 +48,12 @@
     </div>
     <nav class="humberger__menu__nav mobile-menu">
         <ul>
-            <li class="active"><a href="/">Home</a></li>
+            <li class="active"><a href="{{ route('welcome') }}">Home</a>
+            </li>
             <li><a href="{{ route('user.shop.index') }}">Shop</a></li>
             <li><a href="#">Pages</a>
                 <ul class="header__menu__dropdown">
                     <li><a href="./shoping-cart.html">Shoping Cart</a></li>
-                    <li><a href="{{ route('user.checkout.index') }}">Check Out</a></li>
-                    <li><a href="{{ route('user.blog-details.index') }}">Blog Details</a></li>
                 </ul>
             </li>
             <li><a href="{{ route('user.blog.index') }}">Blog</a></li>
@@ -110,7 +109,7 @@
                         <div class="header__top__right__auth">
                             @if (Auth::check())
                                 <div class="header__top__right__language">
-                                    <div>{{ Auth::user()->HoTen }}</div> 
+                                    <div>{{ Auth::user()->HoTen }}</div>
                                     <span class="arrow_carrot-down"></span>
                                     <ul>
                                         <li><a href="#">Quản lý tài khoản</a></li>
@@ -150,8 +149,6 @@
                         <li><a href="#">Pages</a>
                             <ul class="header__menu__dropdown">
                                 <li><a href="{{ route('user.shopping-cart.index') }}">Shoping Cart</a></li>
-                                <li><a href="{{ route('user.checkout.index') }}">Check Out</a></li>
-                                <li><a href="{{ route('user.blog-details.index') }}">Blog Details</a></li>
                             </ul>
                         </li>
                         <li><a href="{{ route('user.blog.index') }}">Blog</a></li>
@@ -162,11 +159,14 @@
             <div class="col-lg-3">
                 <div class="header__cart">
                     <ul>
-                        <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
-                        <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
+                        <li><a href="#"><i class="fa fa-heart"></i> <span>0</span></a></li>
+                        <li><a href="{{ route('cart.index') }}"><i class="fa fa-shopping-bag"></i>
+                                <span>{{ $cartCount }}</span></a></li>
                     </ul>
-                    <div class="header__cart__price">item: <span>199k</span></div>
+                    <div class="header__cart__price">Tổng: <span>{{ number_format($cartTotal, 0, ',', '.') }}
+                            VNĐ</span></div>
                 </div>
+
             </div>
         </div>
         <div class="humberger__open">

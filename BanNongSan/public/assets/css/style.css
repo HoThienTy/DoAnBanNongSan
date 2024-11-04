@@ -993,11 +993,13 @@ ol {
 .latest-product__item__pic {
 	float: left;
 	margin-right: 26px;
+	height: 100px;
+	width: 100px;
 }
 
 .latest-product__item__pic img {
-	height: 110px;
-	width: 110px;
+	height: 100px;
+	width: 100px;
 }
 
 .latest-product__item__text {
@@ -1919,6 +1921,9 @@ ol {
 .shoping__cart__table table tbody tr td.shoping__cart__item img {
 	display: inline-block;
 	margin-right: 25px;
+	width: 100px;
+	height: 100px;
+	object-fit: cover;
 }
 
 .shoping__cart__table table tbody tr td.shoping__cart__item h5 {

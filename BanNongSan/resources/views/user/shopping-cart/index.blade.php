@@ -32,20 +32,14 @@
                     <div class="hero__categories">
                         <div class="hero__categories__all">
                             <i class="fa fa-bars"></i>
-                            <span>All departments</span>
+                            <span>Danh mục sản phẩm</span>
                         </div>
                         <ul>
-                            <li><a href="#">Fresh Meat</a></li>
-                            <li><a href="#">Vegetables</a></li>
-                            <li><a href="#">Fruit & Nut Gifts</a></li>
-                            <li><a href="#">Fresh Berries</a></li>
-                            <li><a href="#">Ocean Foods</a></li>
-                            <li><a href="#">Butter & Eggs</a></li>
-                            <li><a href="#">Fastfood</a></li>
-                            <li><a href="#">Fresh Onion</a></li>
-                            <li><a href="#">Papayaya & Crisps</a></li>
-                            <li><a href="#">Oatmeal</a></li>
-                            <li><a href="#">Fresh Bananas</a></li>
+                            @foreach ($categories as $category)
+                                <li><a
+                                        href="{{ route('user.shop.index', ['category' => $category->MaDanhMuc]) }}">{{ $category->TenDanhMuc }}</a>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
@@ -78,7 +72,7 @@
     <!-- Hero Section End -->
 
     <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="img/breadcrumb.jpg">
+    <section class="breadcrumb-section set-bg" data-setbg="{{ asset('assets/img/breadcrumb.jpg') }}">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -111,74 +105,47 @@
                                     <th></th>
                                 </tr>
                             </thead>
+                            <!-- Thay thế nội dung trong <tbody> bằng mã sau -->
                             <tbody>
-                                <tr>
-                                    <td class="shoping__cart__item">
-                                        <img src="img/cart/cart-1.jpg" alt="">
-                                        <h5>Vegetable’s Package</h5>
-                                    </td>
-                                    <td class="shoping__cart__price">
-                                        100.000 VNĐ
-                                    </td>
-                                    <td class="shoping__cart__quantity">
-                                        <div class="quantity">
-                                            <div class="pro-qty">
-                                                <input type="text" value="1">
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="shoping__cart__total">
-                                        120.000 VNĐ
-                                    </td>
-                                    <td class="shoping__cart__item__close">
-                                        <span class="icon_close"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="shoping__cart__item">
-                                        <img src="img/cart/cart-2.jpg" alt="">
-                                        <h5>Fresh Garden Vegetable</h5>
-                                    </td>
-                                    <td class="shoping__cart__price">
-                                        100.000 VNĐ
-                                    </td>
-                                    <td class="shoping__cart__quantity">
-                                        <div class="quantity">
-                                            <div class="pro-qty">
-                                                <input type="text" value="1">
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="shoping__cart__total">
-                                        120.000 VNĐ
-                                    </td>
-                                    <td class="shoping__cart__item__close">
-                                        <span class="icon_close"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="shoping__cart__item">
-                                        <img src="img/cart/cart-3.jpg" alt="">
-                                        <h5>Organic Bananas</h5>
-                                    </td>
-                                    <td class="shoping__cart__price">
-                                        $69.00
-                                    </td>
-                                    <td class="shoping__cart__quantity">
-                                        <div class="quantity">
-                                            <div class="pro-qty">
-                                                <input type="text" value="1">
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="shoping__cart__total">
-                                        $69.99
-                                    </td>
-                                    <td class="shoping__cart__item__close">
-                                        <span class="icon_close"></span>
-                                    </td>
-                                </tr>
+                                @if (session('cart') && count(session('cart')) > 0)
+                                    @foreach (session('cart') as $MaSanPham => $item)
+                                        <tr>
+                                            <td class="shoping__cart__item">
+                                                <img src="{{ asset('images/products/' . $item['photo']) }}"
+                                                    alt="{{ $item['name'] }}">
+                                                <h5>{{ $item['name'] }}</h5>
+                                            </td>
+                                            <td class="shoping__cart__price">
+                                                {{ number_format($item['price'], 0, ',', '.') }} VNĐ
+                                            </td>
+                                            <td class="shoping__cart__quantity">
+                                                <div class="quantity">
+                                                    <div class="pro-qty">
+                                                        <input type="text" name="quantities[{{ $MaSanPham }}]"
+                                                            value="{{ $item['quantity'] }}">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="shoping__cart__total">
+                                                {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }} VNĐ
+                                            </td>
+                                            <td class="shoping__cart__item__close">
+                                                <form action="{{ route('cart.remove') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="MaSanPham" value="{{ $MaSanPham }}">
+                                                    <button type="submit" class="btn btn-link p-0 m-0"><span
+                                                            class="icon_close"></span></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="5" class="text-center">Giỏ hàng của bạn đang trống.</td>
+                                    </tr>
+                                @endif
                             </tbody>
+
                         </table>
                     </div>
                 </div>
@@ -186,11 +153,13 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="shoping__cart__btns">
-                        <a href="#" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
-                        <a href="#" class="primary-btn cart-btn cart-btn-right"><span class="icon_loading"></span>
-                            Upadate Cart</a>
+                        <a href="{{ route('user.shop.index') }}" class="primary-btn cart-btn">TIẾP TỤC MUA SẮM</a>
+                        <button type="submit" class="primary-btn cart-btn cart-btn-right"><span
+                                class="icon_loading"></span>
+                            Cập nhật giỏ hàng</button>
                     </div>
                 </div>
+
                 <div class="col-lg-6">
                     <div class="shoping__continue">
                         <div class="shoping__discount">
@@ -203,14 +172,26 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
+                    <!-- Tính tổng tiền -->
+                    @php
+                        $total = 0;
+                        if (session('cart')) {
+                            foreach (session('cart') as $item) {
+                                $total += $item['price'] * $item['quantity'];
+                            }
+                        }
+                    @endphp
+
+                    <!-- Hiển thị tổng tiền -->
                     <div class="shoping__checkout">
-                        <h5>Cart Total</h5>
+                        <h5>Tổng giỏ hàng</h5>
                         <ul>
-                            <li>Subtotal <span>$454.98</span></li>
-                            <li>Total <span>$454.98</span></li>
+                            <li>Tổng phụ <span>{{ number_format($total, 0, ',', '.') }} VNĐ</span></li>
+                            <li>Tổng <span>{{ number_format($total, 0, ',', '.') }} VNĐ</span></li>
                         </ul>
-                        <a href="#" class="primary-btn">PROCEED TO CHECKOUT</a>
+                        <a href="{{ route('checkout.index') }}" class="primary-btn">TIẾN HÀNH THANH TOÁN</a>
                     </div>
+
                 </div>
             </div>
         </div>

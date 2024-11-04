@@ -32,14 +32,13 @@
                     <div class="hero__categories">
                         <div class="hero__categories__all">
                             <i class="fa fa-bars"></i>
-                            <span>All departments</span>
+                            <span>Danh mục sản phẩm</span>
                         </div>
                         <ul>
                             @foreach ($categories as $category)
-                                <li><a href="#">{{ $category->TenDanhMuc }}</a></li>
+                                <li><a href="{{ route('user.shop.index', ['category' => $category->MaDanhMuc]) }}">{{ $category->TenDanhMuc }}</a></li>
                             @endforeach
                         </ul>
-
                     </div>
                 </div>
                 <div class="col-lg-9">

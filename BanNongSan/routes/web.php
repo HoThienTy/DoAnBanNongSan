@@ -22,6 +22,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CartController;
 
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
@@ -32,7 +33,26 @@ Route::get('/checkout', action: [CheckOutController::class, 'index'])->name('use
 Route::get('/shopping-cart', action: [ShoppingCartController::class, 'index'])->name('user.shopping-cart.index');
 Route::get('/blog', action: [BlogController::class, 'index'])->name('user.blog.index');
 Route::get('/blog-details', action: [BlogController::class, 'blogdetail'])->name('user.blog-details.index');
+// Hiển thị chi tiết sản phẩm
+Route::get('/product/{MaSanPham}', [ProductController::class, 'show'])->name('user.product-detail.show');
 
+// Thêm sản phẩm vào giỏ hàng
+Route::post('/cart/add/{MaSanPham}', [CartController::class, 'add'])->name('cart.add');
+
+// Hiển thị giỏ hàng
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+// Cập nhật số lượng sản phẩm trong giỏ hàng
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+
+// Xóa sản phẩm khỏi giỏ hàng
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+
+// Trang thanh toán
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+
+// Xử lý đơn hàng khi thanh toán
+Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
 
 // Trang dashboard chính
 Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -66,10 +86,10 @@ Route::prefix('admin/categories')->name('admin.categories.')->group(function () 
 // Quản lý kho hàng
 Route::prefix('admin/warehouse')->name('admin.warehouse.')->middleware('auth')->group(function () {
     Route::get('/', [WarehouseController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý kho hàng');
-    
+
     // Đặt route '/search' trước route '/{id}'
     Route::get('/search', [WarehouseController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý kho hàng');
-    
+
     Route::get('/{id}', [WarehouseController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý kho hàng');
     Route::post('/{id}/adjust', [WarehouseController::class, 'adjustStock'])->name('adjust')->middleware(CheckPermission::class . ':Quản lý kho hàng');
     Route::post('/{id}/set-minimum', [WarehouseController::class, 'setMinimumLevel'])->name('set-minimum')->middleware(CheckPermission::class . ':Quản lý kho hàng');

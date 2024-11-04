@@ -36,7 +36,7 @@
             Nav header start
         ***********************************-->
         <div class="nav-header">
-            <a href="index.html" class="brand-logo">
+            <a href="{{ route('admin.dashboard') }}" class="brand-logo">
                 <svg width="150" height="40" xmlns="http://www.w3.org/2000/svg">
                     <text x="0" y="30" font-size="30" fill="rgb(25, 59, 98)"
                         font-family="Arial, sans-serif">Organi</text>

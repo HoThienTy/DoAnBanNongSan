@@ -9,6 +9,11 @@
     <meta name="keywords" content="Cửa hàng, sản phẩm, khuyến mãi">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cửa hàng</title>
+    <!-- Line Awesome Icons -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css"
+        integrity="sha512-m9hPrbV2Ih1M57e/0xjPSNHr1gYf1XJh8xIKRyYpIB0Mccp5mlqXu0JIzHm6qm/96nR7z9K3TttZUNPDb9eUnA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&display=swap" rel="stylesheet">
@@ -16,6 +21,45 @@
 
     <!-- Thêm CSS cho nhãn giảm giá -->
     <style>
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pagination-gutter {
+            gap: 5px;
+        }
+
+        .pagination .page-item {
+            margin: 0 2px;
+        }
+
+        .pagination .page-link {
+            display: block;
+            padding: 8px 12px;
+            color: #333;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            pointer-events: none;
+        }
+
         .product__discount__percent {
             position: absolute;
             left: 0;
@@ -211,7 +255,7 @@
                         <!-- Latest Products Sidebar -->
                         <div class="sidebar__item">
                             <div class="latest-product__text">
-                                <h4>Sản phẩm mới nhất</h4>
+                                <h4>Sản phẩm mới</h4>
                                 <div class="latest-product__slider owl-carousel">
                                     @foreach ($latestProducts->chunk(3) as $chunk)
                                         <div class="latest-prdouct__slider__item">
@@ -353,9 +397,74 @@
                             <p>Không tìm thấy sản phẩm nào.</p>
                         @endforelse
                     </div>
-                    <div class="product__pagination">
-                        {{ $products->appends(request()->except('page'))->links() }}
-                    </div>
+                    @if ($products->hasPages())
+                        <nav>
+                            <ul class="pagination pagination-gutter" style="place-content: center;">
+                                {{-- Nút "Trang trước" --}}
+                                @if ($products->onFirstPage())
+                                    <li class="page-item page-indicator disabled">
+                                        <a class="page-link" href="javascript:void(0)">
+                                            <i class="fa fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item page-indicator">
+                                        <a class="page-link" href="{{ $products->previousPageUrl() }}">
+                                            <i class="fa fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Hiển thị trang đầu nếu cần --}}
+                                @if ($products->currentPage() > 3)
+                                    <li class="page-item"><a class="page-link" href="{{ $products->url(1) }}">1</a>
+                                    </li>
+                                    @if ($products->currentPage() > 4)
+                                        <li class="page-item disabled"><a class="page-link" href="#">...</a>
+                                        </li>
+                                    @endif
+                                @endif
+
+                                {{-- Hiển thị các trang xung quanh trang hiện tại --}}
+                                @for ($page = max($products->currentPage() - 2, 1); $page <= min($products->currentPage() + 2, $products->lastPage()); $page++)
+                                    @if ($page == $products->currentPage())
+                                        <li class="page-item active"><a class="page-link"
+                                                href="javascript:void(0)">{{ $page }}</a></li>
+                                    @else
+                                        <li class="page-item"><a class="page-link"
+                                                href="{{ $products->url($page) }}">{{ $page }}</a></li>
+                                    @endif
+                                @endfor
+
+                                {{-- Hiển thị trang cuối nếu cần --}}
+                                @if ($products->currentPage() < $products->lastPage() - 2)
+                                    @if ($products->currentPage() < $products->lastPage() - 3)
+                                        <li class="page-item disabled"><a class="page-link" href="#">...</a>
+                                        </li>
+                                    @endif
+                                    <li class="page-item"><a class="page-link"
+                                            href="{{ $products->url($products->lastPage()) }}">{{ $products->lastPage() }}</a>
+                                    </li>
+                                @endif
+
+                                {{-- Nút "Trang sau" --}}
+                                @if ($products->hasMorePages())
+                                    <li class="page-item page-indicator">
+                                        <a class="page-link" href="{{ $products->nextPageUrl() }}">
+                                            <i class="fa fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item page-indicator disabled">
+                                        <a class="page-link" href="javascript:void(0)">
+                                            <i class="fa fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
+                    @endif
+
                 </div>
             </div>
         </div>
