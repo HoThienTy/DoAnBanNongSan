@@ -49,10 +49,9 @@
     <nav class="humberger__menu__nav mobile-menu">
         <ul>
             <li class="active"><a href="/">Home</a></li>
-            <li><a href="{{ route('user.shop-grid.index') }}">Shop</a></li>
+            <li><a href="{{ route('user.shop.index') }}">Shop</a></li>
             <li><a href="#">Pages</a>
                 <ul class="header__menu__dropdown">
-                    <li><a href="{{ route('user.product-detail.index') }}">Shop Details</a></li>
                     <li><a href="./shoping-cart.html">Shoping Cart</a></li>
                     <li><a href="{{ route('user.checkout.index') }}">Check Out</a></li>
                     <li><a href="{{ route('user.blog-details.index') }}">Blog Details</a></li>
@@ -147,10 +146,9 @@
                 <nav class="header__menu">
                     <ul>
                         <li class="active"><a href="/">Home</a></li>
-                        <li><a href="{{ route('user.shop-grid.index') }}">Shop</a></li>
+                        <li><a href="{{ route('user.shop.index') }}">Shop</a></li>
                         <li><a href="#">Pages</a>
                             <ul class="header__menu__dropdown">
-                                <li><a href="{{ route('user.product-detail.index') }}">Shop Details</a></li>
                                 <li><a href="{{ route('user.shopping-cart.index') }}">Shoping Cart</a></li>
                                 <li><a href="{{ route('user.checkout.index') }}">Check Out</a></li>
                                 <li><a href="{{ route('user.blog-details.index') }}">Blog Details</a></li>

@@ -18,4 +18,9 @@ class DanhMucSanPham extends Model
     {
         return $this->hasMany(SanPham::class, 'MaDanhMuc', 'MaDanhMuc');
     }
+
+    public function sanPhams()
+    {
+        return $this->hasMany(SanPham::class, 'MaDanhMuc', 'MaDanhMuc');
+    }
 }

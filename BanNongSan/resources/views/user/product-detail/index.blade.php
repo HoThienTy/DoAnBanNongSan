@@ -82,13 +82,14 @@
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <div class="breadcrumb__text">
-                        <h2>Vegetable’s Package</h2>
+                        <h2>{{ $product->TenSanPham }}</h2>
                         <div class="breadcrumb__option">
-                            <a href="./index.html">Home</a>
-                            <a href="./index.html">Vegetables</a>
-                            <span>Vegetable’s Package</span>
+                            <a href="{{ route('welcome') }}">Trang chủ</a>
+                            <a href="{{ route('user.shop.index', ['category' => $product->MaDanhMuc]) }}">{{ $product->danhMuc->TenDanhMuc }}</a>
+                            <span>{{ $product->TenSanPham }}</span>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -103,58 +104,35 @@
                     <div class="product__details__pic">
                         <div class="product__details__pic__item">
                             <img class="product__details__pic__item--large"
-                                src="{{ asset('assets/img/product/details/product-details-1.jpg') }}" alt="">
-                        </div>
-                        <div class="product__details__pic__slider owl-carousel">
-                            <img data-imgbigurl="{{ asset('assets/img/product/details/product-details-2.jpg') }}"
-                                src="{{ asset('assets/img/product/details/thumb-1.jpg') }}" alt="">
-                            <img data-imgbigurl="{{ asset('assets/img/product/details/product-details-3.jpg') }}"
-                                src="{{ asset('assets/img/product/details/thumb-2.jpg') }}" alt="">
-                            <img data-imgbigurl="img/product/details/product-details-5.jpg"
-                                src="{{ asset('assets/img/product/details/thumb-3.jpg') }}" alt="">
-                            <img data-imgbigurl="{{ asset('assets/img/product/details/product-details-4.jpg') }}"
-                                src="{{ asset('assets/img/product/details/thumb-4.jpg') }}" alt="">
+                                src="{{ asset('images/products/' . $product->HinhAnh) }}" alt="{{ $product->TenSanPham }}">
                         </div>
                     </div>
+                    
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__text">
-                        <h3>Vetgetable’s Package</h3>
-                        <div class="product__details__rating">
+                        <h3>{{ $product->TenSanPham }}</h3>
+                        <!-- Nếu bạn có đánh giá, hiển thị ở đây -->
+                        <!-- <div class="product__details__rating">
                             <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half-o"></i>
-                            <span>(18 reviews)</span>
-                        </div>
-                        <div class="product__details__price">100.000 VNĐ</div>
-                        <p>Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Vestibulum ac diam sit amet quam
-                            vehicula elementum sed sit amet dui. Sed porttitor lectus nibh. Vestibulum ac diam sit amet
-                            quam vehicula elementum sed sit amet dui. Proin eget tortor risus.</p>
+                            <!-- Các ngôi sao -->
+                        <!-- </div> -->
+                        <div class="product__details__price">{{ number_format($product->GiaBan, 0, ',', '.') }} VNĐ</div>
+                        <p>{{ $product->MoTa }}</p>
                         <div class="product__details__quantity">
                             <div class="quantity">
-                                <div class="pro-qty">
-                                    <input type="text" value="1">
-                                </div>
+                                <form action="{{ route('cart.add', $product->MaSanPham) }}" method="POST">
+                                    @csrf
+                                    <div class="pro-qty">
+                                        <input type="text" name="quantity" value="1">
+                                    </div>
+                                    <button type="submit" class="primary-btn">THÊM VÀO GIỎ HÀNG</button>
+                                </form>
                             </div>
                         </div>
-                        <a href="#" class="primary-btn">ADD TO CARD</a>
-                        <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
-                        <ul>
-                            <li><b>Availability</b> <span>In Stock</span></li>
-                            <li><b>Shipping</b> <span>01 day shipping. <samp>Free pickup today</samp></span></li>
-                            <li><b>Weight</b> <span>0.5 kg</span></li>
-                            <li><b>Share on</b>
-                                <div class="share">
-                                    <a href="#"><i class="fa fa-facebook"></i></a>
-                                    <a href="#"><i class="fa fa-twitter"></i></a>
-                                    <a href="#"><i class="fa fa-instagram"></i></a>
-                                    <a href="#"><i class="fa fa-pinterest"></i></a>
-                                </div>
-                            </li>
-                        </ul>
+                        <!-- Các thông tin khác nếu cần -->
                     </div>
+                    
                 </div>
                 <div class="col-lg-12">
                     <div class="product__details__tab">
@@ -252,67 +230,24 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="{{ asset('assets/img/product/product-1.jpg') }}">
-                            <ul class="product__item__pic__hover">
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6><a href="#">Crab Pool Security</a></h6>
-                            <h5>100.000 VNĐ</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="{{ asset('assets/img/product/product-2.jpg') }}">
-                            <ul class="product__item__pic__hover">
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6><a href="#">Crab Pool Security</a></h6>
-                            <h5>100.000 VNĐ</h5>
+                @foreach($relatedProducts as $relatedProduct)
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="product__item">
+                            <div class="product__item__pic set-bg" data-setbg="{{ asset('images/products/' . $relatedProduct->HinhAnh) }}">
+                                <ul class="product__item__pic__hover">
+                                    <!-- ... -->
+                                </ul>
+                                <a href="{{ route('user.product-detail.show', $relatedProduct->MaSanPham) }}" class="product-link"></a>
+                            </div>
+                            <div class="product__item__text">
+                                <h6><a href="{{ route('user.product-detail.show', $relatedProduct->MaSanPham) }}">{{ $relatedProduct->TenSanPham }}</a></h6>
+                                <h5>{{ number_format($relatedProduct->GiaBan, 0, ',', '.') }} VNĐ</h5>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="{{ asset('assets/img/product/product-3.jpg') }}">
-                            <ul class="product__item__pic__hover">
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6><a href="#">Crab Pool Security</a></h6>
-                            <h5>100.000 VNĐ</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="{{ asset('assets/img/product/product-7.jpg') }}">
-                            <ul class="product__item__pic__hover">
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6><a href="#">Crab Pool Security</a></h6>
-                            <h5>100.000 VNĐ</h5>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
+            
         </div>
     </section>
     <!-- Related Product Section End -->

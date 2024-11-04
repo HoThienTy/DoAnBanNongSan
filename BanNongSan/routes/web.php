@@ -20,13 +20,14 @@ use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ShopController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
-Route::get('/shopgrid', [ShopGridController::class, 'index'])->name('user.shop-grid.index');
-Route::get('/productdetail', action: [ProductDetailController::class, 'index'])->name('user.product-detail.index');
+
+Route::get('/shop', [ShopController::class, 'index'])->name('user.shop.index');
+Route::get('/productdetail/{MaSanPham}', [ProductDetailController::class, 'show'])->name('user.product-detail.show');
 Route::get('/checkout', action: [CheckOutController::class, 'index'])->name('user.checkout.index');
 Route::get('/shopping-cart', action: [ShoppingCartController::class, 'index'])->name('user.shopping-cart.index');
 Route::get('/blog', action: [BlogController::class, 'index'])->name('user.blog.index');
