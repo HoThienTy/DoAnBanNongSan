@@ -26,7 +26,7 @@ class NguoiDung extends Authenticatable implements CanResetPasswordContract
     protected $hidden = [
         'MatKhau',
     ];
-    
+
     public function vaiTro()
     {
         return $this->belongsTo(Vaitro::class, 'MaVaiTro', 'MaVaiTro');
@@ -66,4 +66,11 @@ class NguoiDung extends Authenticatable implements CanResetPasswordContract
     {
         return $this->vaiTro->quyen();
     }
+
+    public function khachHang()
+    {
+        return $this->hasOne(KhachHang::class, 'MaNguoiDung', 'MaNguoiDung');
+    }
+
+
 }

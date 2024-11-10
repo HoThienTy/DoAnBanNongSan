@@ -46,13 +46,14 @@
                 <div class="col-lg-9">
                     <div class="hero__search">
                         <div class="hero__search__form">
-                            <form action="#">
+                            <form action="{{ route('user.shop.index') }}" method="GET">
                                 <div class="hero__search__categories">
-                                    All Categories
+                                    Tất cả
                                     <span class="arrow_carrot-down"></span>
                                 </div>
-                                <input type="text" placeholder="What do yo u need?">
-                                <button type="submit" class="site-btn">SEARCH</button>
+                                <input type="text" name="search" placeholder="Bạn cần tìm gì?"
+                                    value="{{ request('search') }}">
+                                <button type="submit" class="site-btn">TÌM KIẾM</button>
                             </form>
                         </div>
                         <div class="hero__search__phone">
@@ -127,7 +128,8 @@
                                                 </div>
                                             </td>
                                             <td class="shoping__cart__total">
-                                                {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }} VNĐ
+                                                {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                                VNĐ
                                             </td>
                                             <td class="shoping__cart__item__close">
                                                 <form action="{{ route('cart.remove') }}" method="POST">
@@ -164,13 +166,20 @@
                     <div class="shoping__continue">
                         <div class="shoping__discount">
                             <h5>Discount Codes</h5>
-                            <form action="#">
-                                <input type="text" placeholder="Enter your coupon code">
+                            <form action="{{ route('coupon.apply') }}" method="POST">
+                                @csrf
+                                <input type="text" name="coupon_code" placeholder="Enter your coupon code">
                                 <button type="submit" class="site-btn">APPLY COUPON</button>
                             </form>
+                            @if (session('coupon'))
+                                <p>Mã giảm giá: {{ session('coupon')->ma_khuyen_mai }} -
+                                    {{ session('coupon')->giam_gia }}%</p>
+                                <a href="{{ route('coupon.remove') }}" class="btn btn-danger">Xóa mã khuyến mãi</a>
+                            @endif
                         </div>
                     </div>
                 </div>
+
                 <div class="col-lg-6">
                     <!-- Tính tổng tiền -->
                     @php
@@ -187,10 +196,27 @@
                         <h5>Tổng giỏ hàng</h5>
                         <ul>
                             <li>Tổng phụ <span>{{ number_format($total, 0, ',', '.') }} VNĐ</span></li>
-                            <li>Tổng <span>{{ number_format($total, 0, ',', '.') }} VNĐ</span></li>
+                    
+                            <!-- Hiển thị giảm giá nếu có mã giảm giá trong session -->
+                            @if (session('coupon'))
+                                @php
+                                    $discount = ($total * session('coupon')->giam_gia) / 100;
+                                    $finalTotal = $total - $discount;
+                                @endphp
+                                <li>Giảm giá ({{ session('coupon')->giam_gia }}%) <span>-{{ number_format($discount, 0, ',', '.') }} VNĐ</span></li>
+                            @else
+                                @php
+                                    $discount = 0;
+                                    $finalTotal = $total;
+                                @endphp
+                            @endif
+                    
+                            <!-- Tổng thanh toán sau khi đã áp dụng giảm giá -->
+                            <li>Tổng <span>{{ number_format($finalTotal, 0, ',', '.') }} VNĐ</span></li>
                         </ul>
                         <a href="{{ route('checkout.index') }}" class="primary-btn">TIẾN HÀNH THANH TOÁN</a>
                     </div>
+                    
 
                 </div>
             </div>

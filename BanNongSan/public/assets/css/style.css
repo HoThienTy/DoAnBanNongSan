@@ -394,7 +394,7 @@ ol {
 }
 
 .header__top__right__auth {
-	display: inline-block;
+	display: ruby;
 }
 
 .header__top__right__auth a {

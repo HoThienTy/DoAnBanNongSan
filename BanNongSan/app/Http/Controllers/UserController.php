@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HoaDon;
+use App\Models\KhachHang;
 use Illuminate\Http\Request;
 use App\Models\NguoiDung;
 use App\Models\Vaitro;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -86,5 +90,126 @@ class UserController extends Controller
         NguoiDung::destroy($id);
         return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được xóa');
     }
+
+    // Xem lịch sử đơn hàng
+    public function orders()
+    {
+        $user = Auth::user();
+        $khachHang = $user->khachHang;
+
+        if (!$khachHang) {
+            // Tạo bản ghi KhachHang cho người dùng
+            $khachHang = KhachHang::create([
+                'MaNguoiDung' => $user->MaNguoiDung,
+                // Các thông tin khác nếu cần
+            ]);
+        }
+
+        $orders = HoaDon::where('ma_khach_hang', $khachHang->MaKhachHang)
+            ->orderBy('ngay_dat', 'desc')
+            ->get();
+
+        return view('user.account.orders', compact('orders'));
+    }
+
+
+    // Theo dõi tình trạng đơn hàng
+    public function trackOrder()
+    {
+        // Bạn có thể hiển thị các đơn hàng đang trong quá trình xử lý
+        $user = Auth::user();
+        $khachHang = $user->khachHang;
+        $orders = HoaDon::where('ma_khach_hang', $khachHang->MaKhachHang)
+            ->where('trang_thai', '!=', 'Đã giao hàng')
+            ->orderBy('ngay_dat', 'desc')
+            ->get();
+
+        return view('user.account.trackOrder', compact('orders'));
+    }
+
+    // Hiển thị form đổi thông tin tài khoản
+    public function editProfile()
+    {
+        $user = Auth::user();
+        return view('user.account.editProfile', compact('user'));
+    }
+
+    // Xử lý cập nhật thông tin tài khoản
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validate dữ liệu
+        $request->validate([
+            'TenDangNhap' => 'required|max:255',
+            'email' => 'required|email|max:255',
+            // Các trường khác nếu cần
+        ]);
+
+        // Cập nhật thông tin người dùng
+        $user->TenDangNhap = $request->input('TenDangNhap');
+        $user->Email = $request->input('email');
+        $user->save();
+
+        // Kiểm tra và tạo bản ghi Khách Hàng nếu chưa có
+        if (!$user->khachHang) {
+            KhachHang::create([
+                'MaNguoiDung' => $user->MaNguoiDung,
+                // Các thông tin khác của Khách Hàng nếu cần
+            ]);
+        }
+
+        return redirect()->route('user.account.editProfile')->with('success', 'Cập nhật thông tin tài khoản thành công.');
+    }
+
+
+    // Hiển thị form đổi mật khẩu
+    public function changePassword()
+    {
+        return view('user.account.changePassword');
+    }
+
+    // Xử lý đổi mật khẩu
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validate dữ liệu
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->input('current_password'), $user->MatKhau)) {
+            return redirect()->back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng.']);
+        }
+
+        // Cập nhật mật khẩu mới
+        $user->MatKhau = Hash::make($request->input('new_password'));
+        $user->save();
+
+
+        return redirect()->route('user.account.changePassword')->with('success', 'Đổi mật khẩu thành công.');
+    }
+
+    public function orderDetail($id)
+    {
+        $user = Auth::user();
+        $khachHang = $user->khachHang;
+
+        if (!$khachHang) {
+            return redirect()->route('user.account.orders')->withErrors(['error' => 'Không tìm thấy thông tin khách hàng.']);
+        }
+
+        $order = HoaDon::where('ma_hoa_don', $id)
+            ->where('ma_khach_hang', $khachHang->MaKhachHang)
+            ->firstOrFail();
+
+        $chiTietHoaDon = $order->chiTietHoaDon()->with('sanPham')->get();
+
+        return view('user.account.orderDetail', compact('order', 'chiTietHoaDon'));
+    }
+
+
 
 }

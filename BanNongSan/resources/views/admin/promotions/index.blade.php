@@ -63,14 +63,19 @@
             <!-- row -->
             <div class="container-fluid">
                 <h1>Quản lý chương trình khuyến mãi</h1>
-            
-                @if(session('success'))
+
+                @if (session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
-            
-                <a href="{{ route('admin.promotions.create') }}" class="btn btn-primary mb-3">Thêm chương trình khuyến mãi</a>
-            
-                @if($promotions->isEmpty())
+
+                <a href="{{ route('admin.promotions.create') }}" class="btn btn-primary mb-3">Thêm chương trình khuyến
+                    mãi</a>
+                <a href="{{ route('admin.promotions.createcoupon') }}" class="btn btn-secondary mb-3">Thêm mã khuyến
+                    mãi</a>
+
+                <!-- Hiển thị các khuyến mãi sản phẩm -->
+                <h3>Chương trình khuyến mãi theo sản phẩm</h3>
+                @if ($productPromotions->isEmpty())
                     <p>Không có chương trình khuyến mãi nào.</p>
                 @else
                     <table class="table table-bordered">
@@ -85,26 +90,73 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($promotions as $promotion)
-                            <tr>
-                                <td>{{ $promotion->ma_khuyen_mai }}</td>
-                                <td>{{ $promotion->ten_khuyen_mai }}</td>
-                                <td>{{ $promotion->ngay_bat_dau }}</td>
-                                <td>{{ $promotion->ngay_ket_thuc }}</td>
-                                <td>{{ $promotion->mo_ta }}</td>
-                                <td>
-                                    <a href="{{ route('admin.promotions.edit', $promotion->ma_khuyen_mai) }}" class="btn btn-warning">Sửa</a>
-                                    <form action="{{ route('admin.promotions.destroy', $promotion->ma_khuyen_mai) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            @foreach ($productPromotions as $promotion)
+                                <tr>
+                                    <td>{{ $promotion->ma_khuyen_mai }}</td>
+                                    <td>{{ $promotion->ten_khuyen_mai }}</td>
+                                    <td>{{ $promotion->ngay_bat_dau }}</td>
+                                    <td>{{ $promotion->ngay_ket_thuc }}</td>
+                                    <td>{{ $promotion->mo_ta }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.promotions.edit', $promotion->ma_khuyen_mai) }}"
+                                            class="btn btn-warning">Sửa</a>
+                                        <form
+                                            action="{{ route('admin.promotions.destroy', $promotion->ma_khuyen_mai) }}"
+                                            method="POST" class="d-inline-block"
+                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
                 @endif
+
+                <!-- Hiển thị các mã khuyến mãi -->
+                <h3>Mã khuyến mãi</h3>
+                @if ($couponPromotions->isEmpty())
+                    <p>Không có mã khuyến mãi nào.</p>
+                @else
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Giảm giá (%)</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Mô tả</th>
+                                <th>Số lần đã sử dụng</th>
+                                <th>Số lần sử dụng tối đa</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($couponPromotions as $coupon)
+                                <tr>
+                                    <td>{{ $coupon->ma_khuyen_mai }}</td>
+                                    <td>{{ $coupon->giam_gia }}%</td>
+                                    <td>{{ $coupon->ngay_bat_dau }}</td>
+                                    <td>{{ $coupon->ngay_ket_thuc }}</td>
+                                    <td>{{ $coupon->mo_ta }}</td>
+                                    <td>{{ $coupon->so_lan_su_dung }}</td>
+                                    <td>{{ $coupon->so_lan_khoi_tao }}</td>
+                                    <td>
+                                        <form action="{{ route('coupon.destroy', $coupon->id) }}" method="POST"
+                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa mã khuyến mãi này?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+
             </div>
         </div>
         <!--**********************************
@@ -120,6 +172,8 @@
         Scripts
     ***********************************-->
     @include('layouts.vendor-admin-js')
+
+
 </body>
 
 </html>

@@ -39,12 +39,12 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'nguoidungs',
+            'provider' => 'nguoi_dung',
         ],
 
         'api' => [
             'driver' => 'token',
-            'provider' => 'nguoidungs',
+            'provider' => 'nguoi_dung',
             'hash' => false,
         ],
     ],
@@ -68,7 +68,7 @@ return [
     */
 
     'providers' => [
-        'nguoidungs' => [
+        'nguoi_dung' => [
             'driver' => 'eloquent',
             'model' => App\Models\NguoiDung::class,
         ],

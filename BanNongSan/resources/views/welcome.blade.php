@@ -36,7 +36,9 @@
                         </div>
                         <ul>
                             @foreach ($categories as $category)
-                                <li><a href="{{ route('user.shop.index', ['category' => $category->MaDanhMuc]) }}">{{ $category->TenDanhMuc }}</a></li>
+                                <li><a
+                                        href="{{ route('user.shop.index', ['category' => $category->MaDanhMuc]) }}">{{ $category->TenDanhMuc }}</a>
+                                </li>
                             @endforeach
                         </ul>
                     </div>
@@ -44,13 +46,14 @@
                 <div class="col-lg-9">
                     <div class="hero__search">
                         <div class="hero__search__form">
-                            <form action="#">
+                            <form action="{{ route('user.shop.index') }}" method="GET">
                                 <div class="hero__search__categories">
-                                    All Categories
+                                    Tất cả
                                     <span class="arrow_carrot-down"></span>
                                 </div>
-                                <input type="text" placeholder="What do yo u need?">
-                                <button type="submit" class="site-btn">SEARCH</button>
+                                <input type="text" name="search" placeholder="Bạn cần tìm gì?"
+                                    value="{{ request('search') }}">
+                                <button type="submit" class="site-btn">TÌM KIẾM</button>
                             </form>
                         </div>
                         <div class="hero__search__phone">
@@ -129,12 +132,13 @@
                     <div class="featured__controls">
                         <ul>
                             <li class="active" data-filter="*">All</li>
-                            <li data-filter=".oranges">Oranges</li>
-                            <li data-filter=".fresh-meat">Fresh Meat</li>
-                            <li data-filter=".vegetables">Vegetables</li>
-                            <li data-filter=".fastfood">Fastfood</li>
+                            @foreach ($categories as $category)
+                                <li data-filter="{{ $category->TenDanhMuc }}">{{ $category->TenDanhMuc }}
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
+
                 </div>
             </div>
             <div class="row featured__filter">
@@ -146,14 +150,24 @@
                                 <ul class="featured__item__pic__hover">
                                     <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                    <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
+
+                                    <li>
+                                        <a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
+                                            <i class="fa fa-shopping-cart"></i>
+                                        </a>
+                                    </li>
+
                                 </ul>
                             </div>
                             <div class="featured__item__text">
-                                <h6><a href="#">{{ $product->TenSanPham }}</a></h6>
+                                <h6><a
+                                        href="{{ route('user.product-detail.show', $product->MaSanPham) }}">{{ $product->TenSanPham }}</a>
+                                </h6>
                                 <h5>{{ number_format($product->GiaBan, 0, ',', '.') }} VNĐ</h5>
                             </div>
                         </div>
+
+
                     </div>
                 @endforeach
             </div>
@@ -195,7 +209,8 @@
                                     @foreach ($latestProducts->slice($i * 3, 3) as $product)
                                         <a href="#" class="latest-product__item">
                                             <div class="latest-product__item__pic">
-                                                <img src="{{ $product->HinhAnh ? asset('images/products/' . $product->HinhAnh) : asset('images/default.jpg') }}" alt="{{ $product->TenSanPham }}">
+                                                <img src="{{ $product->HinhAnh ? asset('images/products/' . $product->HinhAnh) : asset('images/default.jpg') }}"
+                                                    alt="{{ $product->TenSanPham }}">
                                             </div>
                                             <div class="latest-product__item__text">
                                                 <h6>{{ $product->TenSanPham }}</h6>
@@ -278,7 +293,49 @@
     @include('layouts.footer')
     @include('layouts.vendor-js')
 
+    <script>
+        function addToCart(MaSanPham) {
+            fetch(`/cart/add/${MaSanPham}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Xử lý phản hồi nếu cần, ví dụ: hiển thị thông báo đã thêm vào giỏ hàng
+                    alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
+                })
+                .catch(error => {
+                    console.error('Lỗi khi thêm vào giỏ hàng:', error);
+                });
+            window.location.href = '/cart';
 
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo MixItUp cho sản phẩm
+            var containerEl = document.querySelector('#productContainer');
+            var mixer = mixitup(containerEl);
+
+            // Lắng nghe sự kiện nhấp vào các mục danh mục
+            document.querySelectorAll('.featured__controls ul li').forEach(function(filterButton) {
+                filterButton.addEventListener('click', function() {
+                    // Xóa lớp 'active' khỏi tất cả các mục và thêm vào mục được chọn
+                    document.querySelectorAll('.featured__controls ul li').forEach(function(btn) {
+                        btn.classList.remove('active');
+                    });
+                    filterButton.classList.add('active');
+
+                    // Áp dụng bộ lọc dựa trên giá trị `data-filter`
+                    var filterValue = filterButton.getAttribute('data-filter');
+                    mixer.filter(filterValue === "all" ? 'all' : filterValue);
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

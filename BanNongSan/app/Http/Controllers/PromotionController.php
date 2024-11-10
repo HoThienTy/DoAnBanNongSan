@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaKhuyenMai;
 use Illuminate\Http\Request;
 use App\Models\ChuongTrinhKhuyenMai;
 use App\Models\SanPham;
@@ -11,9 +12,18 @@ class PromotionController extends Controller
 {
     public function index()
     {
-        $promotions = ChuongTrinhKhuyenMai::all();
-        return view('admin.promotions.index', compact('promotions'));
+        // Lấy khuyến mãi theo sản phẩm
+        $productPromotions = ChuongTrinhKhuyenMai::all();
+
+        // Lấy mã khuyến mãi (coupon)
+        $couponPromotions = MaKhuyenMai::where('trang_thai', 1)
+            ->whereDate('ngay_bat_dau', '<=', now())
+            ->whereDate('ngay_ket_thuc', '>=', now())
+            ->get();
+
+        return view('admin.promotions.index', compact('productPromotions', 'couponPromotions'));
     }
+
 
     public function create()
     {

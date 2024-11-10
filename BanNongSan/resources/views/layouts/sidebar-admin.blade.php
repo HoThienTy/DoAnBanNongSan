@@ -153,7 +153,8 @@
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('admin.promotions.index') }}">Danh sách khuyến mãi</a></li>
-                    <li><a href="{{ route('admin.promotions.create') }}">Thêm khuyến mãi</a></li>
+                    <li><a href="{{ route('admin.promotions.create') }}">Khuyến mãi theo sản phẩm</a></li>
+                    <li><a href="{{ route('admin.promotions.createcoupon') }}">Thêm Mã khuyến mãi</a></li>
                 </ul>
             </li>
             

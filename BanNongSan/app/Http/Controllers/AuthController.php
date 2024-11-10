@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KhachHang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,21 @@ class AuthController extends Controller
         $nguoiDung->HoTen = $request->ho_ten;
         $nguoiDung->MaVaiTro = 1; // Vai trò Khách hàng
         $nguoiDung->save();
+
+        // Tạo người dùng mới
+        $user = NguoiDung::create([
+            'TenDangNhap' => $request->TenDangNhap,
+            'MatKhau' => bcrypt($request->MatKhau),
+            'Email' => $request->Email,
+            'HoTen' => $request->HoTen,
+            'MaVaiTro' => 1, // Mặc định là khách hàng
+        ]);
+
+        // Tạo bản ghi Khách Hàng
+        KhachHang::create([
+            'MaNguoiDung' => $user->MaNguoiDung,
+            // Các thông tin khác nếu cần
+        ]);
 
         // Đăng nhập người dùng
         Auth::login($nguoiDung);

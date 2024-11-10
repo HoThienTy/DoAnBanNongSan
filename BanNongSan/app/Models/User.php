@@ -23,6 +23,12 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function khachHang()
+    {
+        return $this->hasOne(KhachHang::class, 'MaNguoiDung', 'MaNguoiDung');
+    }
+
+
     /**
      * The attributes that should be hidden for serialization.
      *

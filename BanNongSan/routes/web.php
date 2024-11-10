@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,7 @@ Route::get('/', [HomeController::class, 'index'])->name('welcome');
 Route::get('/shop', [ShopController::class, 'index'])->name('user.shop.index');
 Route::get('/productdetail/{MaSanPham}', [ProductDetailController::class, 'show'])->name('user.product-detail.show');
 Route::get('/checkout', action: [CheckOutController::class, 'index'])->name('user.checkout.index');
+Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('user.checkout.success');
 Route::get('/shopping-cart', action: [ShoppingCartController::class, 'index'])->name('user.shopping-cart.index');
 Route::get('/blog', action: [BlogController::class, 'index'])->name('user.blog.index');
 Route::get('/blog-details', action: [BlogController::class, 'blogdetail'])->name('user.blog-details.index');
@@ -115,10 +117,17 @@ Route::prefix('admin/promotions')->name('admin.promotions.')->middleware('auth')
     Route::get('/', [PromotionController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::get('/create', [PromotionController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::post('/store', [PromotionController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+
+    // Routes mới cho mã khuyến mãi với CouponController
+    Route::get('/createcoupon', [CouponController::class, 'createcoupon'])->name('createcoupon')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::post('/storecoupon', [CouponController::class, 'storecoupon'])->name('storecoupon')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+
+
     Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::put('/{id}', [PromotionController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
 });
+Route::delete('/admin/coupons/{id}', [CouponController::class, 'destroy'])->name('coupon.destroy');
 
 // Quản lý đơn hàng
 // Quản lý đơn hàng
@@ -170,5 +179,22 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
-// Đăng xuất
-Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+// Các route liên quan đến tài khoản người dùng
+Route::prefix('account')->name('user.account.')->middleware('auth')->group(function () {
+    Route::get('/orders', [UserController::class, 'orders'])->name('orders');
+    Route::get('/track-order', [UserController::class, 'trackOrder'])->name('trackOrder');
+    Route::get('/edit-profile', [UserController::class, 'editProfile'])->name('editProfile');
+    Route::post('/edit-profile', [UserController::class, 'updateProfile'])->name('updateProfile');
+    Route::get('/change-password', [UserController::class, 'changePassword'])->name('changePassword');
+    Route::post('/change-password', [UserController::class, 'updatePassword'])->name('updatePassword');
+
+    Route::get('/account/orders/{id}', [UserController::class, 'orderDetail'])->name('user.account.orderDetail');
+
+});
+
+Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.apply');
+Route::get('/coupon/remove', [CouponController::class, 'remove'])->name('coupon.remove');
+
+
+// Route đăng xuất
+Route::get('/logout', [AuthController::class, 'logout'])->name('auth.logout');

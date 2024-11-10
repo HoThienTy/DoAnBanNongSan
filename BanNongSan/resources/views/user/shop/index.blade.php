@@ -308,7 +308,9 @@
                                                     <ul class="product__item__pic__hover">
                                                         <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                                         <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                                        <li><a href="#"><i class="fa fa-shopping-cart"></i></a>
+                                                        <li><a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
+                                                            <i class="fa fa-shopping-cart"></i>
+                                                        </a>
                                                         </li>
                                                     </ul>
                                                     <!-- Liên kết tới trang chi tiết sản phẩm -->
@@ -379,7 +381,9 @@
                                         <ul class="product__item__pic__hover">
                                             <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                             <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
+                                            <li><a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
+                                                <i class="fa fa-shopping-cart"></i>
+                                            </a></li>
                                         </ul>
                                         <!-- Liên kết tới trang chi tiết sản phẩm -->
                                         <a href="{{ route('user.product-detail.show', $product->MaSanPham) }}"
@@ -508,6 +512,27 @@
                 }
             });
         });
+    </script>
+    <script>
+        function addToCart(MaSanPham) {
+            fetch(`/cart/add/${MaSanPham}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Xử lý phản hồi nếu cần, ví dụ: hiển thị thông báo đã thêm vào giỏ hàng
+                alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
+            })
+            .catch(error => {
+                console.error('Lỗi khi thêm vào giỏ hàng:', error);
+            });
+            window.location.href = '/cart';
+
+        }
     </script>
 </body>
 

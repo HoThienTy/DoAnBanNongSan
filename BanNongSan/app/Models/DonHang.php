@@ -15,7 +15,9 @@ class DonHang extends Model
         'ngay_dat',
         'tong_tien',
         'trang_thai',
+        'phuong_thuc_thanh_toan', // Thêm cột này
     ];
+    
 
     public $timestamps = false; // Nếu bảng không có cột 'created_at' và 'updated_at'
 
