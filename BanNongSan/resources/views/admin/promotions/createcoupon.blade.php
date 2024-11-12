@@ -10,17 +10,17 @@
     <meta name="author" content="DexignZone">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Organi: Admin Dashboard">
-    <meta property="og:title" content="Organi: Admin Dashboard">
-    <meta property="og:description" content="Organi: Admin Dashboard">
+    <meta name="description" content="Organi: Trang Chủ Admin">
+    <meta property="og:title" content="Organi: Trang Chủ Admin">
+    <meta property="og:description" content="Organi: Trang Chủ Admin">
     <meta property="og:image" content="https://dompet.dexignlab.com/xhtml/social-image.png">
     <meta name="format-detection" content="telephone=no">
 
     <!-- PAGE TITLE HERE -->
-    <title>Organi: Admin Dashboard</title>
+    <title>Organi: Trang Chủ Admin</title>
 
     <!-- FAVICONS ICON -->
-    <link rel="shortcut icon" type="image/png" href="images/favicon.png">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('assets_admin/images/favicon.png') }}">
 
     @include('layouts.vendor-admin-css')
 </head>

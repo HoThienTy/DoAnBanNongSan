@@ -6,7 +6,6 @@
     </div>
     <div class="humberger__menu__cart">
         <ul>
-            <li><a href="#"><i class="fa fa-heart"></i> <span>0</span></a></li>
             <li><a href="{{ route('cart.index') }}"><i class="fa fa-shopping-bag"></i>
                     <span>{{ $cartCount }}</span></a></li>
         </ul>
@@ -132,22 +131,21 @@
             <div class="col-lg-6">
                 <nav class="header__menu">
                     <ul>
-                        <li class="active"><a href="/">Home</a></li>
-                        <li><a href="{{ route('user.shop.index') }}">Shop</a></li>
+                        <li class="active"><a href="/">Trang Chủ</a></li>
+                        <li><a href="{{ route('user.shop.index') }}">Cửa Hàng</a></li>
                         <li><a href="#">Pages</a>
                             <ul class="header__menu__dropdown">
-                                <li><a href="{{ route('user.shopping-cart.index') }}">Shoping Cart</a></li>
+                                <li><a href="{{ route('user.shopping-cart.index') }}">Giỏ Hàng</a></li>
                             </ul>
                         </li>
                         <li><a href="{{ route('user.blog.index') }}">Blog</a></li>
-                        <li><a href="./contact.html">Contact</a></li>
+                        <li><a href="./contact.html">Liên Hệ</a></li>
                     </ul>
                 </nav>
             </div>
             <div class="col-lg-3">
                 <div class="header__cart">
                     <ul>
-                        <li><a href="#"><i class="fa fa-heart"></i> <span>0</span></a></li>
                         <li><a href="{{ route('cart.index') }}"><i class="fa fa-shopping-bag"></i>
                                 <span>{{ $cartCount }}</span></a></li>
                     </ul>

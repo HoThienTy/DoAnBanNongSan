@@ -32,7 +32,7 @@
                     <div class="hero__categories">
                         <div class="hero__categories__all">
                             <i class="fa fa-bars"></i>
-                            <span>Danh mục sản phẩm</span>
+                            <span>Danh mục</span>
                         </div>
                         <ul>
                             @foreach ($categories as $category)
@@ -61,17 +61,17 @@
                                 <i class="fa fa-phone"></i>
                             </div>
                             <div class="hero__search__phone__text">
-                                <h5>123456789</h5>
-                                <span>support 24/7 time</span>
+                                <h5>0777526729</h5>
+                                <span>Hỗ trợ 24/7</span>
                             </div>
                         </div>
                     </div>
                     <div class="hero__item set-bg" data-setbg="{{ asset('assets/img/hero/banner.jpg') }}">
                         <div class="hero__text">
-                            <span>FRUIT FRESH</span>
-                            <h2>Vegetable <br />100% Organic</h2>
-                            <p>Free Pickup and Delivery Available</p>
-                            <a href="#" class="primary-btn">SHOP NOW</a>
+                            <span>Thực phẩm sạch</span>
+                            <h2>Thực Phẩm <br />100% Organic</h2>
+                            <p>Có sẵn nhận và giao hàng miễn phí</p>
+                            <a href="#" class="primary-btn">MUA NGAY</a>
                         </div>
                     </div>
                 </div>
@@ -85,40 +85,25 @@
         <div class="container">
             <div class="row">
                 <div class="categories__slider owl-carousel">
-                    <div class="col-lg-3">
-                        <div class="categories__item set-bg"
-                            data-setbg="{{ asset('assets/img/categories/cat-1.jpg') }}">
-                            <h5><a href="#">Fresh Fruit</a></h5>
+                    @foreach ($categories as $index => $category)
+                        <div class="col-lg-3">
+                            <div class="categories__item set-bg"
+                                data-setbg="{{ asset('assets/img/categories/cat-' . (($index % 5) + 1) . '.jpg') }}">
+                                <h5>
+                                    <a href="{{ route('user.shop.index', ['category' => $category->MaDanhMuc]) }}">
+                                        {{ $category->TenDanhMuc }}
+                                    </a>
+                                </h5>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="categories__item set-bg"
-                            data-setbg="{{ asset('assets/img/categories/cat-2.jpg') }}">
-                            <h5><a href="#">Dried Fruit</a></h5>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="categories__item set-bg"
-                            data-setbg="{{ asset('assets/img/categories/cat-3.jpg') }}">
-                            <h5><a href="#">Vegetables</a></h5>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="categories__item set-bg"
-                            data-setbg="{{ asset('assets/img/categories/cat-4.jpg') }}">
-                            <h5><a href="#">drink fruits</a></h5>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="categories__item set-bg"
-                            data-setbg="{{ asset('assets/img/categories/cat-5.jpg') }}">
-                            <h5><a href="#">drink fruits</a></h5>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </section>
+    <!-- Categories Section End -->
+
+
     <!-- Categories Section End -->
 
     <!-- Featured Section Begin -->
@@ -127,11 +112,11 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title">
-                        <h2>Featured Product</h2>
+                        <h2>Sản Phẩm Nổi Bật</h2>
                     </div>
                     <div class="featured__controls">
                         <ul>
-                            <li class="active" data-filter="*">All</li>
+                            <li class="active" data-filter="*">Tất Cả</li>
                             @foreach ($categories as $category)
                                 <li data-filter="{{ $category->TenDanhMuc }}">{{ $category->TenDanhMuc }}
                                 </li>
@@ -148,7 +133,6 @@
                             <div class="featured__item__pic set-bg"
                                 data-setbg="{{ asset('images/products/' . $product->HinhAnh) }}">
                                 <ul class="featured__item__pic__hover">
-                                    <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
 
                                     <li>
@@ -235,7 +219,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title from-blog__title">
-                        <h2>From The Blog</h2>
+                        <h2>Từ Blog</h2>
                     </div>
                 </div>
             </div>
@@ -247,11 +231,11 @@
                         </div>
                         <div class="blog__item__text">
                             <ul>
-                                <li><i class="fa fa-calendar-o"></i> May 4,2024</li>
+                                <li><i class="fa fa-calendar-o"></i> Ngày 4 tháng 5, 2024</li>
                                 <li><i class="fa fa-comment-o"></i> 5</li>
                             </ul>
-                            <h5><a href="#">Cooking tips make cooking simple</a></h5>
-                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat </p>
+                            <h5><a href="#">Mẹo nấu ăn giúp việc nấu ăn trở nên đơn giản</a></h5>
+                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat</p>
                         </div>
                     </div>
                 </div>
@@ -262,11 +246,11 @@
                         </div>
                         <div class="blog__item__text">
                             <ul>
-                                <li><i class="fa fa-calendar-o"></i> May 4,2024</li>
+                                <li><i class="fa fa-calendar-o"></i> Ngày 4 tháng 5, 2024</li>
                                 <li><i class="fa fa-comment-o"></i> 5</li>
                             </ul>
-                            <h5><a href="#">6 ways to prepare breakfast for 30</a></h5>
-                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat </p>
+                            <h5><a href="#">6 cách chuẩn bị bữa sáng cho 30 người</a></h5>
+                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat</p>
                         </div>
                     </div>
                 </div>
@@ -277,17 +261,18 @@
                         </div>
                         <div class="blog__item__text">
                             <ul>
-                                <li><i class="fa fa-calendar-o"></i> May 4,2024</li>
+                                <li><i class="fa fa-calendar-o"></i> Ngày 4 tháng 5, 2024</li>
                                 <li><i class="fa fa-comment-o"></i> 5</li>
                             </ul>
-                            <h5><a href="#">Visit the clean farm in the US</a></h5>
-                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat </p>
+                            <h5><a href="#">Thăm trang trại sạch ở Mỹ</a></h5>
+                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
     <!-- Blog Section End -->
 
     @include('layouts.footer')

@@ -4,9 +4,8 @@
             <li class="dropdown header-profile">
                 @if (Auth::check())
                     <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
-                        <img src="{{ asset('images/profile/pic1.jpg') }}" width="20" alt="">
                         <div class="header-info ms-3">
-                            <span class="font-w600">Hi,<b>{{ Auth::user()->HoTen }}</b></span>
+                            <span class="font-w600">Hi,{{ Auth::user()->HoTen }}</span>
                             <small class="text-end font-w400">{{ Auth::user()->Email }}</small>
                         </div>
                     </a>
@@ -27,7 +26,6 @@
                     </div>
                 @else
                     <a class="nav-link" href="{{ route('auth.login.index') }}">
-                        <img src="{{ asset('images/profile/default.jpg') }}" width="20" alt="">
                         <div class="header-info ms-3">
                             <span class="font-w600">Hi,<b>Guest</b></span>
                             <small class="text-end font-w400">Please login</small>
@@ -36,23 +34,13 @@
                 @endif
             </li>
 
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+            <li><a href="{{ route('admin.dashboard') }}" class="ai-icon" aria-expanded="false">
                     <i class="flaticon-025-dashboard"></i>
-                    <span class="nav-text">Dashboard</span>
+                    <span class="nav-text">Trang Chủ</span>
                 </a>
-                <ul aria-expanded="false">
-                    <li><a href="index.html">Dashboard Light</a></li>
-                    <li><a href="index-2.html">Dashboard Dark</a></li>
-                    <li><a href="my-wallet.html">My Wallet</a></li>
-                    <li><a href="page-invoices.html">Invoices</a></li>
-                    <li><a href="cards-center.html">Cards Center</a></li>
-                    <li><a href="page-transaction.html">Transaction</a></li>
-                    <li><a href="transaction-details.html">Transaction Details</a></li>
-                </ul>
-
             </li>
             <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-050-info"></i>
+                    <i class="flaticon-381-user"></i>
                     <span class="nav-text">Quản Lý Người Dùng</span>
                 </a>
                 <ul aria-expanded="false">
@@ -61,41 +49,63 @@
                 </ul>
             </li>
 
+            <!-- Báo Cáo Thống Kê -->
             <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="flaticon-041-graph"></i>
-                    <span class="nav-text">Báo Cáo Thống Kê</span>
+                    <span class="nav-text">Báo Cáo Thống Kê</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="chart-flot.html">Flot</a></li>
-                    <li><a href="chart-morris.html">Morris</a></li>
-                    <li><a href="chart-chartjs.html">Chartjs</a></li>
-                    <li><a href="chart-chartist.html">Chartist</a></li>
-                    <li><a href="chart-sparkline.html">Sparkline</a></li>
-                    <li><a href="chart-peity.html">Peity</a></li>
+                    <li><a href="{{ route('admin.reports.cancelled_products') }}">Hàng hủy</a></li>
+                    <li><a href="{{ route('admin.reports.revenue') }}">Doanh thu</a></li>
+                    <li><a href="{{ route('admin.reports.inventory') }}">Tồn kho</a></li>
+                    <li><a href="{{ route('admin.reports.best_selling_products') }}">Sản phẩm bán chạy</a></li>
                 </ul>
             </li>
+
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-381-networking"></i>
+                    <i class="flaticon-381-list"></i>
                     <span class="nav-text">Quản Lý Đơn Hàng</span>
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('admin.orders.index') }}">Danh sách đơn hàng</a></li>
                 </ul>
             </li>
-            
+
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-381-folder"></i>
+                    <i class="flaticon-381-location"></i>
                     <span class="nav-text">Quản Lý Giao Hàng</span>
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('admin.delivery.index') }}">Danh sách giao hàng</a></li>
                 </ul>
             </li>
-            
+
+            <!-- Quản Lý Nhà Cung Cấp -->
+            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="flaticon-381-share"></i>
+                    <span class="nav-text">Quản Lý Nhà Cung Cấp</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('admin.suppliers.index') }}">Danh sách nhà cung cấp</a></li>
+                    <li><a href="{{ route('admin.suppliers.create') }}">Thêm nhà cung cấp</a></li>
+                </ul>
+            </li>
+
+            <!-- Quản Lý Đặt Hàng -->
+            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="flaticon-381-notebook"></i>
+                    <span class="nav-text">Quản Lý Đặt Hàng</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('admin.purchase_orders.index') }}">Danh sách phiếu đặt hàng</a></li>
+                    <li><a href="{{ route('admin.purchase_orders.create') }}">Thêm phiếu đặt hàng</a></li>
+                </ul>
+            </li>
+
             <li><a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
-                    <i class="flaticon-045-heart"></i>
+                    <i class="flaticon-381-id-card"></i>
                     <span class="nav-text">Quản Lý Sản Phẩm</span>
                 </a>
                 <ul aria-expanded="false">
@@ -105,7 +115,7 @@
             </li>
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
-                    <i class="flaticon-013-checkmark"></i>
+                    <i class="flaticon-381-folder"></i>
                     <span class="nav-text">Quản Lý Danh Mục</span>
                 </a>
                 <ul aria-expanded="false">
@@ -116,7 +126,7 @@
 
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
-                    <i class="flaticon-013-checkmark"></i>
+                    <i class="flaticon-381-home"></i>
                     <span class="nav-text">Quản Lý Kho</span>
                 </a>
                 <ul aria-expanded="false">
@@ -144,11 +154,11 @@
                     <li><a href="{{ route('admin.cancellation.create') }}">Ghi nhận hủy hàng</a></li>
                 </ul>
             </li>
-            
-            
+
+
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-043-menu"></i>
+                    <i class="flaticon-381-promotion"></i>
                     <span class="nav-text">Quản Lý Khuyến Mãi</span>
                 </a>
                 <ul aria-expanded="false">
@@ -157,27 +167,8 @@
                     <li><a href="{{ route('admin.promotions.createcoupon') }}">Thêm Mã khuyến mãi</a></li>
                 </ul>
             </li>
+
             
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="flaticon-022-copy"></i>
-                    <span class="nav-text">Pages</span>
-                </a>
-                <ul aria-expanded="false">
-                    <li><a href="page-login.html">Login</a></li>
-                    <li><a href="page-register.html">Register</a></li>
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">Error</a>
-                        <ul aria-expanded="false">
-                            <li><a href="page-error-400.html">Error 400</a></li>
-                            <li><a href="page-error-403.html">Error 403</a></li>
-                            <li><a href="page-error-404.html">Error 404</a></li>
-                            <li><a href="page-error-500.html">Error 500</a></li>
-                            <li><a href="page-error-503.html">Error 503</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="page-lock-screen.html">Lock Screen</a></li>
-                    <li><a href="empty-page.html">Empty Page</a></li>
-                </ul>
-            </li>
         </ul>
     </div>
 </div>

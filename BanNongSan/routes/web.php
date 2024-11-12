@@ -24,6 +24,9 @@ use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
@@ -72,6 +75,10 @@ Route::prefix('admin/products')->name('admin.products.')->group(function () {
     Route::get('/search', [ProductController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý sản phẩm');
 });
 
+Route::get('/admin/reports/inventory/export-excel', [ReportController::class, 'exportInventoryExcel'])->name('admin.reports.inventory.export_excel');
+Route::get('/admin/reports/cancelled-products/export-excel', [ReportController::class, 'exportCancelledProductsExcel'])->name('admin.reports.cancelled_products.export_excel');
+Route::get('/admin/reports/revenue/export-excel', [ReportController::class, 'exportRevenueExcel'])->name('admin.reports.revenue.export_excel');
+Route::get('/admin/reports/best-selling-products/export-excel', [ReportController::class, 'exportBestSellingProductsExcel'])->name('admin.reports.best_selling_products.export_excel');
 
 // Quản lý danh mục
 Route::prefix('admin/categories')->name('admin.categories.')->group(function () {
@@ -156,6 +163,40 @@ Route::prefix('admin')->middleware(CheckPermission::class . ':Quản lý ngườ
         Route::put('/{id}', [UserController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý người dùng');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý người dùng');
     });
+});
+
+// Quản lý nhà cung cấp
+Route::prefix('admin/suppliers')->name('admin.suppliers.')->middleware('auth')->group(function () {
+    Route::get('/', [SupplierController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+    Route::get('/create', [SupplierController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+    Route::post('/store', [SupplierController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+    Route::get('/{id}/edit', [SupplierController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+    Route::put('/{id}', [SupplierController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+    Route::delete('/{id}', [SupplierController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+    Route::get('/{id}', [SupplierController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+
+    // Chi tiết giao dịch
+    Route::get('/{supplierId}/transaction/{transactionId}', [SupplierController::class, 'transactionDetail'])->name('transactionDetail')->middleware(CheckPermission::class . ':Quản lý nhà cung cấp');
+});
+
+
+
+// Quản lý đặt hàng từ nhà cung cấp
+Route::prefix('admin/purchase-orders')->name('admin.purchase_orders.')->middleware('auth')->group(function () {
+    Route::get('/', [PurchaseOrderController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+    Route::get('/create', [PurchaseOrderController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+    Route::post('/store', [PurchaseOrderController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+    Route::get('/{id}', [PurchaseOrderController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+    Route::get('/{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+    Route::put('/{id}', [PurchaseOrderController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+    Route::delete('/{id}', [PurchaseOrderController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý đặt hàng');
+});
+
+Route::prefix('admin/reports')->name('admin.reports.')->middleware('auth')->group(function () {
+    Route::get('/cancelled-products', [ReportController::class, 'cancelledProductsReport'])->name('cancelled_products');
+    Route::get('/revenue', [ReportController::class, 'revenueReport'])->name('revenue');
+    Route::get('/inventory', [ReportController::class, 'inventoryReport'])->name('inventory');
+    Route::get('/best-selling-products', [ReportController::class, 'bestSellingProductsReport'])->name('best_selling_products');
 });
 
 

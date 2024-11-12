@@ -8896,7 +8896,7 @@ label {
 
 .nav-header {
   height: 6.3rem;
-  width: 20.5rem;
+  width: 21.5rem;
   display: inline-block;
   text-align: left;
   position: absolute;
@@ -11863,7 +11863,7 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
     transform: rotate(0); } }
 
 .dlabnav {
-  width: 20.5rem;
+  width: 21.5rem;
   padding-bottom: 0;
   height: calc(100% - 135px);
   position: absolute;
@@ -13295,7 +13295,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
     [data-sidebar-style="icon-hover"][data-layout="vertical"] .dlabnav.mm-show {
       display: none; }
   [data-sidebar-style="icon-hover"][data-layout="vertical"] .iconhover-toggle .nav-header {
-    width: 20.5rem; }
+    width: 21.5rem; }
     [data-sidebar-style="icon-hover"][data-layout="vertical"] .iconhover-toggle .nav-header .brand-logo {
       padding-left: 1.6rem; }
       [data-sidebar-style="icon-hover"][data-layout="vertical"] .iconhover-toggle .nav-header .brand-logo .brand-title {

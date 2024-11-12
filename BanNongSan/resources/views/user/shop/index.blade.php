@@ -118,8 +118,8 @@
                                 <i class="fa fa-phone"></i>
                             </div>
                             <div class="hero__search__phone__text">
-                                <h5>123456789</h5>
-                                <span>support 24/7 time</span>
+                                <h5>0777526729</h5>
+                                <span>Hỗ trợ 24/7</span>
                             </div>
                         </div>
                     </div>
@@ -306,7 +306,6 @@
                                                     <div class="product__discount__percent">
                                                         -{{ number_format($giamGia, 0) }}%</div>
                                                     <ul class="product__item__pic__hover">
-                                                        <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                                         <li><a href="#"><i class="fa fa-retweet"></i></a></li>
                                                         <li><a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
                                                             <i class="fa fa-shopping-cart"></i>
@@ -379,7 +378,6 @@
                                     <div class="product__item__pic set-bg"
                                         data-setbg="{{ asset('images/products/' . $product->HinhAnh) }}">
                                         <ul class="product__item__pic__hover">
-                                            <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                             <li><a href="#"><i class="fa fa-retweet"></i></a></li>
                                             <li><a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
                                                 <i class="fa fa-shopping-cart"></i>
