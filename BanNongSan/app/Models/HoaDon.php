@@ -16,7 +16,11 @@ class HoaDon extends Model
         'ngay_dat',
         'tong_tien',
         'trang_thai',
+        'phuong_thuc_thanh_toan',
+        'ma_khuyen_mai',
+        'giam_gia',
     ];
+    
 
     public function khachHang()
     {

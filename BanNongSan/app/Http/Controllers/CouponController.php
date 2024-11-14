@@ -64,6 +64,7 @@ class CouponController extends Controller
 
 
 
+
     public function destroy($id)
     {
         // Tìm mã khuyến mãi dựa trên ID

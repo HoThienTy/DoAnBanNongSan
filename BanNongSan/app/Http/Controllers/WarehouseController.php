@@ -31,7 +31,7 @@ class WarehouseController extends Controller
         }
 
         // Lấy danh sách sản phẩm
-        $products = $products->get();
+        $products = $products->paginate(10);
 
         // Kiểm tra cảnh báo
         $warnings = [];
@@ -168,7 +168,7 @@ class WarehouseController extends Controller
         $searchName = $request->input('TenSanPham');
         $searchCode = $request->input('MaSanPham');
 
-        // Khởi tạo query builder
+        // Khởi tạo query builder với phân trang
         $products = SanPham::with('khoHang');
 
         // Nếu có tham số tìm kiếm theo tên
@@ -181,8 +181,8 @@ class WarehouseController extends Controller
             $products->where('MaSanPham', $searchCode);
         }
 
-        // Lấy danh sách sản phẩm
-        $products = $products->get();
+        // Lấy danh sách sản phẩm với phân trang (10 sản phẩm mỗi trang)
+        $products = $products->paginate(10);
 
         // Render view partial
         $html = view('admin.warehouse.warehouse_table', compact('products'))->render();
@@ -190,6 +190,7 @@ class WarehouseController extends Controller
         // Trả về kết quả dưới dạng JSON
         return response()->json(['html' => $html]);
     }
+
 
 
 }

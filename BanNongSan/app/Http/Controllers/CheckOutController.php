@@ -75,6 +75,15 @@ class CheckOutController extends Controller
             $total += $item['price'] * $item['quantity'];
         }
 
+        // Kiểm tra mã khuyến mãi
+        $coupon = session('coupon');
+        $discount = 0;
+        if ($coupon) {
+            $discount = ($total * $coupon->giam_gia) / 100;
+        }
+
+        $finalTotal = $total - $discount;
+
         // Lấy hoặc tạo khách hàng
         if (Auth::check()) {
             // Nếu người dùng đã đăng nhập
@@ -87,8 +96,15 @@ class CheckOutController extends Controller
                     'MaNguoiDung' => $user->id, // Hoặc 'MaNguoiDung' tùy theo tên cột của bạn
                     'TenKhachHang' => $request->HoTen,
                     'SoDienThoai' => $request->SoDienThoai,
-                    'DiaChi' => $request->DiaChi,
+                    'DiaChi' => $DiaChi, // Sử dụng biến $DiaChi đã xây dựng
                     // Các cột khác nếu cần
+                ]);
+            } else {
+                // Cập nhật địa chỉ khách hàng nếu cần
+                $khachHang->update([
+                    'TenKhachHang' => $request->HoTen,
+                    'SoDienThoai' => $request->SoDienThoai,
+                    'DiaChi' => $DiaChi, // Cập nhật địa chỉ
                 ]);
             }
         } else {
@@ -96,7 +112,7 @@ class CheckOutController extends Controller
             $khachHang = KhachHang::create([
                 'TenKhachHang' => $request->HoTen,
                 'SoDienThoai' => $request->SoDienThoai,
-                'DiaChi' => $request->DiaChi,
+                'DiaChi' => $DiaChi, // Sử dụng biến $DiaChi đã xây dựng
                 // Các cột khác nếu cần
             ]);
         }
@@ -108,13 +124,14 @@ class CheckOutController extends Controller
         // Tạo đơn hàng
         $donHang = DonHang::create([
             'ma_khach_hang' => $maKhachHang,
-            'ma_nhan_vien' => null, // Bạn có thể để null nếu không có
+            'ma_nhan_vien' => null,
             'ngay_dat' => date('Y-m-d'),
-            'tong_tien' => $total,
+            'tong_tien' => $finalTotal,
             'trang_thai' => 'Đang xử lý',
-            'phuong_thuc_thanh_toan' => $phuongThucThanhToan, // Thêm cột này trong bảng nếu chưa có
+            'phuong_thuc_thanh_toan' => $phuongThucThanhToan,
+            'ma_khuyen_mai' => $coupon ? $coupon->ma_khuyen_mai : null,
+            'giam_gia' => $coupon ? $coupon->giam_gia : 0,
         ]);
-
 
 
         // Lưu chi tiết đơn hàng

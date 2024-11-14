@@ -51,7 +51,7 @@
             <li class="active"><a href="{{ route('welcome') }}">Home</a>
             </li>
             <li><a href="{{ route('user.shop.index') }}">Shop</a></li>
-            <li><a href="#">Pages</a>
+            <li><a href="#">Giỏ Hàng</a>
                 <ul class="header__menu__dropdown">
                     <li><a href="./shoping-cart.html">Shoping Cart</a></li>
                 </ul>
@@ -128,22 +128,22 @@
                     <a href="/"><img src="{{ asset('assets/img/logo.png') }}" alt=""></a>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <nav class="header__menu">
                     <ul>
-                        <li class="active"><a href="/">Trang Chủ</a></li>
-                        <li><a href="{{ route('user.shop.index') }}">Cửa Hàng</a></li>
-                        <li><a href="#">Pages</a>
-                            <ul class="header__menu__dropdown">
-                                <li><a href="{{ route('user.shopping-cart.index') }}">Giỏ Hàng</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="{{ route('user.blog.index') }}">Blog</a></li>
-                        <li><a href="./contact.html">Liên Hệ</a></li>
+                        <li class="{{ request()->is('/') ? 'active' : '' }}"><a href="{{ url('/') }}">Trang
+                                chủ</a></li>
+                        <li class="{{ request()->is('shop') ? 'active' : '' }}"><a
+                                href="{{ route('user.shop.index') }}">Cửa hàng</a></li>
+                        <li class="{{ request()->is('cart') ? 'active' : '' }}"><a
+                                href="{{ route('cart.index') }}">Giỏ hàng</a></li>
+                        <li class="{{ request()->is('contact') ? 'active' : '' }}"><a
+                                href="{{ url('/contact') }}">Liên hệ</a></li>
+                        <li class="{{ request()->is('blog') ? 'active' : '' }}"><a href="{{ route('user.blog.index') }}">Blog</a></li>
                     </ul>
                 </nav>
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-2">
                 <div class="header__cart">
                     <ul>
                         <li><a href="{{ route('cart.index') }}"><i class="fa fa-shopping-bag"></i>

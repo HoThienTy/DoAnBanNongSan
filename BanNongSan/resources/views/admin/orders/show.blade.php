@@ -111,6 +111,33 @@
                     <p>Chưa có thông tin thanh toán.</p>
                 @endif
 
+                <h3>Thông tin khuyến mãi</h3>
+                @if ($order->ma_khuyen_mai)
+                    <p><strong>Mã khuyến mãi:</strong> {{ $order->ma_khuyen_mai }}</p>
+                    <p><strong>Giảm giá:</strong> {{ $order->giam_gia }}%</p>
+                @else
+                    <p>Không áp dụng mã khuyến mãi.</p>
+                @endif
+
+                <h3>Tổng cộng</h3>
+                @php
+                    $subTotal = 0;
+                    foreach ($order->chiTietHoaDon as $chiTiet) {
+                        $subTotal += $chiTiet->don_gia * $chiTiet->so_luong;
+                    }
+                    $discountAmount = ($subTotal * $order->giam_gia) / 100;
+                    $totalAfterDiscount = $subTotal - $discountAmount;
+                @endphp
+                <ul>
+                    <li>Tổng phụ: {{ number_format($subTotal, 0, ',', '.') }} VNĐ</li>
+                    @if ($order->giam_gia > 0)
+                        <li>Giảm giá ({{ $order->giam_gia }}%): -{{ number_format($discountAmount, 0, ',', '.') }} VNĐ
+                        </li>
+                    @endif
+                    <li>Tổng tiền: {{ number_format($totalAfterDiscount, 0, ',', '.') }} VNĐ</li>
+                </ul>
+
+
                 <h3>Cập nhật trạng thái đơn hàng</h3>
                 <form action="{{ route('admin.orders.update', $order->ma_hoa_don) }}" method="POST">
                     @csrf

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopGridController;
@@ -90,20 +91,42 @@ Route::prefix('admin/categories')->name('admin.categories.')->group(function () 
     Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý danh mục');
 });
 
-
-// Quản lý kho hàng
 // Quản lý kho hàng
 Route::prefix('admin/warehouse')->name('admin.warehouse.')->middleware('auth')->group(function () {
     Route::get('/', [WarehouseController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý kho hàng');
 
     // Đặt route '/search' trước route '/{id}'
-    Route::get('/search', [WarehouseController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::get('/search', action: [WarehouseController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý kho hàng');
 
     Route::get('/{id}', [WarehouseController::class, 'show'])->name('show')->middleware(CheckPermission::class . ':Quản lý kho hàng');
     Route::post('/{id}/adjust', [WarehouseController::class, 'adjustStock'])->name('adjust')->middleware(CheckPermission::class . ':Quản lý kho hàng');
     Route::post('/{id}/set-minimum', [WarehouseController::class, 'setMinimumLevel'])->name('set-minimum')->middleware(CheckPermission::class . ':Quản lý kho hàng');
 });
 
+// Quản lý quyền
+Route::prefix('admin/permissions')->name('permissions.')->middleware('auth')->group(function () {
+    Route::get('/', [PermissionController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý quyền');
+
+    // Đặt route '/search' trước route '/{id}'
+    Route::get('/search', [PermissionController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý quyền');
+
+    Route::get('/create', [PermissionController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý quyền');
+    Route::post('/', [PermissionController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý quyền');
+
+    Route::get('/{id}/edit', [PermissionController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý quyền');
+    Route::put('/{id}', [PermissionController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý quyền');
+
+    Route::delete('/{id}', [PermissionController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý quyền');
+
+    // Routes mới cho phân quyền
+    Route::get('/assign', [PermissionController::class, 'assignForm'])->name('assign.form')->middleware(CheckPermission::class . ':Quản lý quyền');
+    Route::post('/assign', [PermissionController::class, 'assignPermissions'])->name('assign')->middleware(CheckPermission::class . ':Quản lý quyền');
+
+    // Routes mới cho phân quyền người dùng
+    Route::get('/assign-user', [PermissionController::class, 'assignUserForm'])->name('assign.user.form')->middleware(CheckPermission::class . ':Quản lý quyền');
+    Route::post('/assign-user', [PermissionController::class, 'assignUserForm'])->name('assign.user'); // Form chọn người dùng
+    Route::post('/assign-user/{user_id}', [PermissionController::class, 'assignUserPermissions'])->name('assign.user.permissions')->middleware(CheckPermission::class . ':Quản lý quyền');
+});
 
 Route::prefix('admin/batches')->name('admin.batch.')->middleware('auth')->group(function () {
     Route::get('/', [BatchController::class, 'index'])->name('index')->middleware(CheckPermission::class . ':Quản lý kho hàng');

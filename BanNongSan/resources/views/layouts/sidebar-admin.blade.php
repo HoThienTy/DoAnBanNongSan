@@ -167,8 +167,21 @@
                     <li><a href="{{ route('admin.promotions.createcoupon') }}">Thêm Mã khuyến mãi</a></li>
                 </ul>
             </li>
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0)" aria-expanded="false">
+                    <i class="flaticon-381-key"></i> <!-- Thay icon phù hợp -->
+                    <span class="nav-text">Quản Lý Quyền</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('permissions.index') }}">Danh Sách Quyền</a></li>
+                    <li><a href="{{ route('permissions.create') }}">Thêm Quyền Mới</a></li>
+                    <li><a href="{{ route('permissions.assign.form') }}">Phân Quyền</a></li>
+                    <li><a href="{{ route('permissions.assign.user.form') }}">Phân Quyền Người Dùng</a></li> <!-- Mục mới -->
+                </ul>
+            </li>
 
-            
+
+
         </ul>
     </div>
 </div>

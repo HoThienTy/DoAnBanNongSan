@@ -62,47 +62,41 @@
         <div class="content-body">
             <!-- row -->
             <div class="container-fluid">
-                <h1>Quản lý kho hàng</h1>
-
+                <h1 class="mt-4">Danh Sách Quyền</h1>
+            
                 @if(session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
+                    <div class="alert alert-success mt-2">{{ session('success') }}</div>
                 @endif
-
-                @if(!empty($warnings))
-                    <div class="alert alert-warning">
-                        <h4>Cảnh báo kho hàng</h4>
-                        <ul>
-                            @foreach($warnings as $warning)
-                                <li>{{ $warning }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+            
+                @if(session('error'))
+                    <div class="alert alert-danger mt-2">{{ session('error') }}</div>
                 @endif
-
+            
+                <div class="mb-3 mt-3">
+                    <a href="{{ route('permissions.create') }}" class="btn btn-primary">Thêm Quyền Mới</a>
+                </div>
+            
                 <!-- Form tìm kiếm -->
                 <div class="card mb-3">
                     <div class="card-body">
-                        <form id="searchForm">
+                        <form id="searchForm" action="{{ route('permissions.search') }}" method="GET">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label for="searchName">Tên sản phẩm</label>
-                                    <input type="text" name="TenSanPham" id="searchName" class="form-control" placeholder="Nhập tên sản phẩm" value="{{ $searchName ?? '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="searchCode">Mã sản phẩm</label>
-                                    <input type="text" name="MaSanPham" id="searchCode" class="form-control" placeholder="Nhập mã sản phẩm" value="{{ $searchCode ?? '' }}">
+                                    <label for="search" class="form-label">Tên Quyền</label>
+                                    <input type="text" name="search" id="search" class="form-control" placeholder="Nhập tên quyền" value="{{ request('search') }}">
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <button type="button" id="searchButton" class="btn btn-primary">Tìm kiếm</button>
+                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                                <button type="button" id="clearSearch" class="btn btn-secondary">Làm mới</button>
                             </div>
                         </form>
                     </div>
                 </div>
-
-                <!-- Bảng danh sách kho hàng -->
-                <div id="warehouseTable">
-                    @include('admin.warehouse.warehouse_table', ['products' => $products])
+            
+                <!-- Hiển thị danh sách quyền -->
+                <div id="permissionsTable">
+                    @include('admin.permissions.permissions_table', ['permissions' => $permissions])
                 </div>
             </div>
         </div>
@@ -121,38 +115,31 @@
     @include('layouts.vendor-admin-js')
     <script>
         $(document).ready(function() {
-            // Khởi tạo tooltip
-            $('[data-toggle="tooltip"]').tooltip();
-
-            // Hàm debounce để giảm số lần gửi yêu cầu
-            function debounce(func, wait) {
-                let timeout;
-                return function() {
-                    const context = this,
-                          args = arguments;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(context, args), wait);
-                };
-            }
-
-            // Hàm gửi yêu cầu AJAX
-            function fetchWarehouses(page = 1) {
-                var name = $('#searchName').val();
-                var code = $('#searchCode').val();
-
+            // Xử lý tìm kiếm
+            $('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+                fetchPermissions(1);
+            });
+    
+            // Xử lý làm mới tìm kiếm
+            $('#clearSearch').on('click', function() {
+                $('#search').val('');
+                fetchPermissions(1);
+            });
+    
+            // Hàm fetchPermissions với AJAX
+            function fetchPermissions(page = 1) {
+                var search = $('#search').val();
+    
                 $.ajax({
-                    url: '{{ route('admin.warehouse.search') }}',
+                    url: '{{ route('permissions.search') }}',
                     type: 'GET',
                     data: {
-                        TenSanPham: name,
-                        MaSanPham: code,
-                        page: page // Thêm tham số page
+                        search: search,
+                        page: page
                     },
                     success: function(response) {
-                        // Cập nhật bảng kho hàng
-                        $('#warehouseTable').html(response.html);
-                        // Khởi tạo lại tooltip cho nội dung mới
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('#permissionsTable').html(response);
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
@@ -160,22 +147,12 @@
                     }
                 });
             }
-
-            // Gọi hàm fetchWarehouses khi người dùng nhập vào ô tìm kiếm với debounce
-            $('#searchName, #searchCode').on('keyup', debounce(function() {
-                fetchWarehouses();
-            }, 500));
-
-            // Gọi hàm fetchWarehouses khi người dùng nhấn nút tìm kiếm
-            $('#searchButton').on('click', function() {
-                fetchWarehouses();
-            });
-
-            // Xử lý sự kiện khi người dùng nhấn vào các liên kết phân trang
+    
+            // Xử lý phân trang với AJAX
             $(document).on('click', '.pagination a', function(event) {
                 event.preventDefault();
                 var page = $(this).attr('href').split('page=')[1];
-                fetchWarehouses(page);
+                fetchPermissions(page);
             });
         });
     </script>

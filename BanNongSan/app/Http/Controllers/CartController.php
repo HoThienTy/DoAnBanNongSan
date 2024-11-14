@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaKhuyenMai;
 use Illuminate\Http\Request;
 use App\Models\SanPham;
 
@@ -12,8 +13,15 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        return view('user.shopping-cart.index', compact('cart'));
+        // Lấy danh sách mã khuyến mãi khả dụng
+        $coupons = MaKhuyenMai::where('trang_thai', 1)
+            ->whereDate('ngay_bat_dau', '<=', now())
+            ->whereDate('ngay_ket_thuc', '>=', now())
+            ->get();
+
+        return view('user.shopping-cart.index', compact('cart', 'coupons'));
     }
+
 
     // Thêm sản phẩm vào giỏ hàng
     public function add(Request $request, $MaSanPham)
