@@ -63,17 +63,32 @@
             <!-- row -->
             <div class="container-fluid">
                 <h1>Quản lý sản phẩm bị hủy</h1>
-            
-                @if(session('success'))
+
+                @if (session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @elseif(session('error'))
                     <div class="alert alert-danger">{{ session('error') }}</div>
                 @endif
-            
-                <a href="{{ route('admin.cancellation.create') }}" class="btn btn-primary mb-3">Ghi nhận sản phẩm bị hủy</a>
-            
+
+                <!-- Form tìm kiếm -->
+                <form method="GET" action="{{ route('admin.cancellation.index') }}" class="mb-3">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input type="text" name="ma_huy" class="form-control" placeholder="Tìm kiếm theo mã hủy"
+                                value="{{ request('ma_huy') }}">
+                        </div>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        </div>
+                    </div>
+                </form>
+
+
+                <a href="{{ route('admin.cancellation.create') }}" class="btn btn-primary mb-3">Ghi nhận sản phẩm bị
+                    hủy</a>
+
                 {{-- Kiểm tra nếu có dữ liệu --}}
-                @if($cancellations->isEmpty())
+                @if ($cancellations->isEmpty())
                     <p>Không có sản phẩm nào bị hủy.</p>
                 @else
                     <table class="table table-bordered">
@@ -89,22 +104,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($cancellations as $cancellation)
-                            <tr>
-                                <td>{{ $cancellation->ma_huy }}</td>
-                                <td>{{ $cancellation->sanPham->TenSanPham ?? 'Không có sản phẩm' }}</td>
-                                <td>{{ $cancellation->loHang->ma_lo_hang ?? 'Không có lô hàng' }}</td>
-                                <td>{{ $cancellation->so_luong }}</td>
-                                <td>{{ $cancellation->ngay_huy }}</td>
-                                <td>{{ $cancellation->ly_do }}</td>
-                                <td>
-                                    <form action="{{ route('admin.cancellation.destroy', $cancellation->ma_huy) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông tin hủy này?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            @foreach ($cancellations as $cancellation)
+                                <tr>
+                                    <td>{{ $cancellation->ma_huy }}</td>
+                                    <td>{{ $cancellation->sanPham->TenSanPham ?? 'Không có sản phẩm' }}</td>
+                                    <td>{{ $cancellation->loHang->ma_lo_hang ?? 'Không có lô hàng' }}</td>
+                                    <td>{{ $cancellation->so_luong }}</td>
+                                    <td>{{ $cancellation->ngay_huy }}</td>
+                                    <td>{{ $cancellation->ly_do }}</td>
+                                    <td>
+                                        <form action="{{ route('admin.cancellation.destroy', $cancellation->ma_huy) }}"
+                                            method="POST" class="d-inline-block"
+                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông tin hủy này?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>

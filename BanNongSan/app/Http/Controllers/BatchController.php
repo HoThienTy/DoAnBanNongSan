@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaKhuyenMai;
 use Illuminate\Http\Request;
 use App\Models\LoHang;
 use App\Models\SanPham;

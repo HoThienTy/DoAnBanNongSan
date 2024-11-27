@@ -15,7 +15,7 @@ class UserController extends Controller
     public function index()
     {
         // Lấy danh sách người dùng và phân quyền, phân trang 12 người dùng mỗi trang
-        $users = NguoiDung::with('vaiTro')->paginate(5);
+        $users = NguoiDung::with(relations: 'vaiTro')->paginate(5);
         return view('admin.users.index', compact('users'));
     }
 
@@ -209,7 +209,5 @@ class UserController extends Controller
 
         return view('user.account.orderDetail', compact('order', 'chiTietHoaDon'));
     }
-
-
 
 }

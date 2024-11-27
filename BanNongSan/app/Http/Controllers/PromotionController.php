@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\MaKhuyenMai;
-use Illuminate\Http\Request;
 use App\Models\ChuongTrinhKhuyenMai;
 use App\Models\SanPham;
 use App\Models\KhuyenMaiSanPham;
+use App\Models\LoHang;
+use Illuminate\Http\Request;
 
 class PromotionController extends Controller
 {
@@ -20,8 +21,10 @@ class PromotionController extends Controller
             ->whereDate('ngay_bat_dau', '<=', now())
             ->whereDate('ngay_ket_thuc', '>=', now())
             ->get();
+        // Lấy tất cả lô hàng
+        $batches = LoHang::all();
 
-        return view('admin.promotions.index', compact('productPromotions', 'couponPromotions'));
+        return view('admin.promotions.index', compact('productPromotions', 'couponPromotions', 'batches'));
     }
 
 
@@ -103,4 +106,71 @@ class PromotionController extends Controller
         $promotion->delete();
         return redirect()->route('admin.promotions.index')->with('success', 'Chương trình khuyến mãi đã được xóa');
     }
+
+    // Thêm mã khuyến mãi vào lô hàng
+    public function addCouponToBatch(Request $request)
+    {
+        $request->validate([
+            'coupon_code' => 'required|string|exists:ma_khuyen_mai,ma_khuyen_mai',
+            'batch_id' => 'required|exists:lohang,ma_lo_hang',
+        ]);
+
+        // Tìm mã khuyến mãi và lô hàng
+        $coupon = MaKhuyenMai::where('ma_khuyen_mai', $request->coupon_code)->first();
+        $batch = LoHang::findOrFail($request->batch_id);
+
+        // Kiểm tra tính hợp lệ của mã khuyến mãi
+        if (!$coupon->isValid()) {
+            return redirect()->back()->withErrors(['coupon_code' => 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.']);
+        }
+
+        // Kiểm tra xem mã khuyến mãi đã được áp dụng cho lô hàng chưa
+        if ($batch->khuyenMai()->where('ma_khuyen_mai', $coupon->ma_khuyen_mai)->exists()) {
+            return redirect()->back()->withErrors(['coupon_code' => 'Mã khuyến mãi này đã được áp dụng cho lô hàng.']);
+        }
+
+        // Thêm mã khuyến mãi vào lô hàng
+        $batch->khuyenMai()->attach($coupon->ma_khuyen_mai);
+
+        // Kiểm tra lại số lượng mã khuyến mãi đã được thêm
+        if ($batch->khuyenMai()->count() > 0) {
+            $batch->trang_thai_khuyen_mai = 'Có khuyến mãi';
+        }
+
+        $batch->save();  // Lưu lại trạng thái lô hàng
+
+        return redirect()->route('admin.promotions.addCouponToBatchPage')->with('success', 'Mã khuyến mãi đã được thêm vào lô hàng thành công');
+    }
+
+    public function addCouponToBatchPage()
+    {
+        // Lấy tất cả các mã khuyến mãi
+        $coupons = MaKhuyenMai::all();
+
+        // Lấy tất cả các lô hàng và eager load quan hệ khuyến mãi
+        $batches = LoHang::with('khuyenMai')->get();  // Eager load `khuyenMai`
+
+        return view('admin.promotions.addCouponToBatch', compact('coupons', 'batches'));
+    }
+
+
+
+    public function removeCouponFromBatch($ma_lo_hang, $coupon_id)
+    {
+        $batch = LoHang::findOrFail($ma_lo_hang);
+        $batch->khuyenMai()->detach($coupon_id);
+
+        // Kiểm tra xem lô hàng còn khuyến mãi hay không và cập nhật trạng thái
+        if ($batch->khuyenMai->isEmpty()) {
+            $batch->trang_thai_khuyen_mai = 'Không có';
+        }
+
+
+        $batch->save();
+
+        return redirect()->back()->with('success', 'Mã khuyến mãi đã được xóa khỏi lô hàng.');
+    }
+
+
+
 }

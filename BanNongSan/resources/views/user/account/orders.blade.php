@@ -46,6 +46,7 @@
                         <th>Ngày đặt</th>
                         <th>Tổng tiền</th>
                         <th>Trạng thái</th>
+                        <th>Chi tiết</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,10 +56,12 @@
                             <td>{{ $order->ngay_dat }}</td>
                             <td>{{ number_format($order->tong_tien, 0, ',', '.') }} VNĐ</td>
                             <td>{{ $order->trang_thai }}</td>
+                            <td><a href="{{ route('user.account.orderDetail', $order->ma_hoa_don) }}" class="btn btn-info">Xem chi tiết</a></td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+
         @endif
     </div>
 

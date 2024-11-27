@@ -28,4 +28,15 @@ class LoHang extends Model
     {
         return $this->hasMany(Huy::class, 'ma_lo_hang', 'ma_lo_hang');
     }
+    public function chuongTrinhKhuyenMai()
+    {
+        return $this->belongsTo(ChuongTrinhKhuyenMai::class, 'ma_khuyen_mai', 'ma_khuyen_mai');
+    }
+
+    public function khuyenMai()
+    {
+        return $this->belongsToMany(MaKhuyenMai::class, 'lohang_ma_khuyen_mai', 'ma_lo_hang', 'ma_khuyen_mai');
+    }
+
+
 }

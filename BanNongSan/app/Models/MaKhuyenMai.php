@@ -25,4 +25,9 @@ class MaKhuyenMai extends Model
         $now = now();
         return $this->trang_thai && $this->ngay_bat_dau <= $now && $this->ngay_ket_thuc >= $now;
     }
+
+    public function loHang()
+    {
+        return $this->belongsToMany(LoHang::class, 'lohang_ma_khuyen_mai', 'ma_khuyen_mai', 'ma_lo_hang');
+    }
 }

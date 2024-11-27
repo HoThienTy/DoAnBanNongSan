@@ -97,12 +97,13 @@ return [
 
     'passwords' => [
         'nguoidungs' => [
-            'provider' => 'nguoidungs',
+            'provider' => 'nguoi_dung', // Changed from 'nguoidungs' to 'nguoi_dung'
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
         ],
     ],
+
 
 
     /*

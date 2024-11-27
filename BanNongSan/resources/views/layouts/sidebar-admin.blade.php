@@ -165,6 +165,7 @@
                     <li><a href="{{ route('admin.promotions.index') }}">Danh sách khuyến mãi</a></li>
                     <li><a href="{{ route('admin.promotions.create') }}">Khuyến mãi theo sản phẩm</a></li>
                     <li><a href="{{ route('admin.promotions.createcoupon') }}">Thêm Mã khuyến mãi</a></li>
+                    <li><a href="{{ route('admin.promotions.addCouponToBatchPage') }}">Thêm Mã Khuyến Mãi vào Lô Hàng</a></li>
                 </ul>
             </li>
             <li>

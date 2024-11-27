@@ -109,44 +109,53 @@
                             <!-- Thay thế nội dung trong <tbody> bằng mã sau -->
                             <tbody>
                                 @if (session('cart') && count(session('cart')) > 0)
-                                    @foreach (session('cart') as $MaSanPham => $item)
-                                        <tr>
-                                            <td class="shoping__cart__item">
-                                                <img src="{{ asset('images/products/' . $item['photo']) }}"
-                                                    alt="{{ $item['name'] }}">
-                                                <h5>{{ $item['name'] }}</h5>
-                                            </td>
-                                            <td class="shoping__cart__price">
-                                                {{ number_format($item['price'], 0, ',', '.') }} VNĐ
-                                            </td>
-                                            <td class="shoping__cart__quantity">
-                                                <div class="quantity">
-                                                    <div class="pro-qty">
-                                                        <input type="text" name="quantities[{{ $MaSanPham }}]"
-                                                            value="{{ $item['quantity'] }}">
+                                    <form action="{{ route('cart.update') }}" method="POST" id="cart-update-form">
+                                        @csrf
+                                        @foreach (session('cart') as $MaSanPham => $item)
+                                            <tr>
+                                                <td class="shoping__cart__item">
+                                                    <img src="{{ asset('images/products/' . $item['photo']) }}"
+                                                        alt="{{ $item['name'] }}">
+                                                    <h5>{{ $item['name'] }}</h5>
+                                                </td>
+                                                <td class="shoping__cart__price">
+                                                    {{ number_format($item['price'], 0, ',', '.') }} VNĐ
+                                                </td>
+                                                <td class="shoping__cart__quantity">
+                                                    <div class="quantity">
+                                                        <div class="pro-qty">
+                                                            <input type="number"
+                                                                name="quantities[{{ $MaSanPham }}]"
+                                                                value="{{ $item['quantity'] }}" min="1"
+                                                                class="cart-quantity-input"
+                                                                data-product-id="{{ $MaSanPham }}">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td class="shoping__cart__total">
-                                                {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
-                                                VNĐ
-                                            </td>
-                                            <td class="shoping__cart__item__close">
-                                                <form action="{{ route('cart.remove') }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="MaSanPham" value="{{ $MaSanPham }}">
-                                                    <button type="submit" class="btn btn-link p-0 m-0"><span
-                                                            class="icon_close"></span></button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                                </td>
+                                                <td class="shoping__cart__total">
+                                                    {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                                    VNĐ
+                                                </td>
+                                                <td class="shoping__cart__item__close">
+                                                    <form action="{{ route('cart.remove') }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="MaSanPham"
+                                                            value="{{ $MaSanPham }}">
+                                                        <button type="submit" class="btn btn-link p-0 m-0"><span
+                                                                class="icon_close"></span></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </form>
                                 @else
                                     <tr>
                                         <td colspan="5" class="text-center">Giỏ hàng của bạn đang trống.</td>
                                     </tr>
                                 @endif
                             </tbody>
+
+
 
                         </table>
                     </div>
@@ -163,29 +172,31 @@
                     <div class="shoping__continue">
                         <div class="shoping__discount">
                             <h5>Mã khuyến mãi</h5>
-                            @if($coupons->count() > 0)
+                            @if ($coupons->count() > 0)
                                 <form action="{{ route('coupon.apply') }}" method="POST">
                                     @csrf
                                     <select name="coupon_code" class="form-control">
                                         <option value="">Chọn mã khuyến mãi</option>
-                                        @foreach($coupons as $coupon)
+                                        @foreach ($coupons as $coupon)
                                             <option value="{{ $coupon->ma_khuyen_mai }}">
                                                 {{ $coupon->ma_khuyen_mai }} - Giảm {{ $coupon->giam_gia }}%
                                             </option>
                                         @endforeach
                                     </select>
-                                    <button type="submit" class="site-btn" style="margin-top: 10px;">Áp dụng mã</button>
+                                    <button type="submit" class="site-btn" style="margin-top: 10px;">Áp dụng
+                                        mã</button>
                                 </form>
                             @else
                                 <p>Hiện không có mã khuyến mãi nào.</p>
                             @endif
-                        
+
                             @if (session('coupon'))
-                                <p>Mã giảm giá: {{ session('coupon')->ma_khuyen_mai }} - {{ session('coupon')->giam_gia }}%</p>
+                                <p>Mã giảm giá: {{ session('coupon')->ma_khuyen_mai }} -
+                                    {{ session('coupon')->giam_gia }}%</p>
                                 <a href="{{ route('coupon.remove') }}" class="btn btn-danger">Xóa mã khuyến mãi</a>
                             @endif
                         </div>
-                        
+
                     </div>
                 </div>
 
@@ -213,7 +224,8 @@
                                     $finalTotal = $total - $discount;
                                 @endphp
                                 <li>Giảm giá ({{ session('coupon')->giam_gia }}%)
-                                    <span>-{{ number_format($discount, 0, ',', '.') }} VNĐ</span></li>
+                                    <span>-{{ number_format($discount, 0, ',', '.') }} VNĐ</span>
+                                </li>
                             @else
                                 @php
                                     $discount = 0;
@@ -236,6 +248,37 @@
 
     @include('layouts.footer')
     @include('layouts.vendor-js')
+
+    <script>
+        $(document).ready(function() {
+            // Lắng nghe sự kiện thay đổi của input số lượng
+            $('.cart-quantity-input').on('change', function() {
+                var productId = $(this).data('product-id');
+                var quantity = $(this).val();
+
+                // Gửi yêu cầu AJAX để cập nhật số lượng sản phẩm
+                $.ajax({
+                    url: '{{ route('cart.update') }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        quantities: {
+                            [productId]: quantity
+                        }
+                    },
+                    success: function(response) {
+                        // Cập nhật lại thông tin giỏ hàng sau khi thay đổi
+                        // Bạn có thể thêm mã để cập nhật thông tin giỏ hàng, tổng tiền, v.v.
+                        location.reload(); // Reload trang để cập nhật dữ liệu giỏ hàng
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Có lỗi khi cập nhật giỏ hàng: " + error);
+                    }
+                });
+            });
+        });
+    </script>
+
 
 
 </body>

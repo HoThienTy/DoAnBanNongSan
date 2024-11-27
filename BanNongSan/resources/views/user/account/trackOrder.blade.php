@@ -34,7 +34,7 @@
 
     @include('layouts.header')
 
-    <div class="container">
+    <div class="container mt-5">
         <h2>Theo dõi tình trạng đơn hàng</h2>
         @if ($orders->isEmpty())
             <p>Hiện không có đơn hàng nào trong quá trình xử lý.</p>

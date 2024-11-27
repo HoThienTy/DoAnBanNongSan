@@ -141,6 +141,9 @@ Route::prefix('admin/cancellations')->name('admin.cancellation.')->middleware('a
     Route::get('/create', [CancellationController::class, 'create'])->name('create')->middleware(CheckPermission::class . ':Quản lý kho hàng');
     Route::post('/store', [CancellationController::class, 'store'])->name('store')->middleware(CheckPermission::class . ':Quản lý kho hàng');
     Route::delete('/{id}', [CancellationController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    Route::get('/search', [CancellationController::class, 'search'])->name('search')->middleware(CheckPermission::class . ':Quản lý kho hàng');
+    ;
+
 });
 
 Route::prefix('admin/promotions')->name('admin.promotions.')->middleware('auth')->group(function () {
@@ -152,10 +155,15 @@ Route::prefix('admin/promotions')->name('admin.promotions.')->middleware('auth')
     Route::get('/createcoupon', [CouponController::class, 'createcoupon'])->name('createcoupon')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::post('/storecoupon', [CouponController::class, 'storecoupon'])->name('storecoupon')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
 
+    // Danh sách các lô hàng
+    Route::get('/addcoupon', [PromotionController::class, 'addCouponToBatchPage'])->name('addCouponToBatchPage')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    // Thêm mã khuyến mãi vào lô hàng
+    Route::post('/addcoupon', [PromotionController::class, 'addCouponToBatch'])->name('addCouponToBatch')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
 
     Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::put('/{id}', [PromotionController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+
 });
 Route::delete('/admin/coupons/{id}', [CouponController::class, 'destroy'])->name('coupon.destroy');
 
@@ -252,9 +260,10 @@ Route::prefix('account')->name('user.account.')->middleware('auth')->group(funct
     Route::get('/change-password', [UserController::class, 'changePassword'])->name('changePassword');
     Route::post('/change-password', [UserController::class, 'updatePassword'])->name('updatePassword');
 
-    Route::get('/account/orders/{id}', [UserController::class, 'orderDetail'])->name('user.account.orderDetail');
-
+    // Định nghĩa route cho chi tiết đơn hàng
+    Route::get('/orders/{id}', [UserController::class, 'orderDetail'])->name('orderDetail');
 });
+
 
 Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.apply');
 Route::get('/coupon/remove', [CouponController::class, 'remove'])->name('coupon.remove');

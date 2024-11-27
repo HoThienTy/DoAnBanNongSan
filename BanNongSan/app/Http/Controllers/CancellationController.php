@@ -10,12 +10,21 @@ use Carbon\Carbon;
 
 class CancellationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Lấy danh sách sản phẩm bị hủy
-        $cancellations = Huy::with('sanPham', 'loHang')->get();
+        $query = Huy::query();
+
+        // Kiểm tra nếu có mã hủy được nhập
+        if ($request->has('ma_huy') && $request->ma_huy != '') {
+            $query->where('ma_huy', 'like', '%' . $request->ma_huy . '%');
+        }
+
+        // Thực hiện các tìm kiếm khác nếu cần (theo ngày hủy, sản phẩm, v.v...)
+        $cancellations = $query->with(['sanPham', 'loHang'])->paginate(10);
+
         return view('admin.cancellation.index', compact('cancellations'));
     }
+
 
     public function create()
     {
@@ -26,7 +35,7 @@ class CancellationController extends Controller
 
     public function store(Request $request)
     {
-        // Xử lý lưu thông tin hủy sản phẩm
+        // Xử lý lưu thông tin hủy
         $request->validate([
             'ma_lo_hang' => 'required|exists:lohang,ma_lo_hang',
             'so_luong' => 'required|integer|min:1',
@@ -38,7 +47,7 @@ class CancellationController extends Controller
 
         // Kiểm tra số lượng trong lô hàng
         if ($request->so_luong > $batch->so_luong) {
-            return back()->with('error', 'Số lượng hủy vượt quá số lượng trong lô hàng.');
+            return back()->with('error', 'Số lượng hủy vượt quá số lượng trong lô hàng. Số lượng còn lại: ' . $batch->so_luong);
         }
 
         // Giảm số lượng trong lô hàng
@@ -56,6 +65,7 @@ class CancellationController extends Controller
 
         return redirect()->route('admin.cancellation.index')->with('success', 'Đã ghi nhận sản phẩm bị hủy.');
     }
+    
 
 
     public function destroy($id)
@@ -72,4 +82,5 @@ class CancellationController extends Controller
 
         return redirect()->route('admin.cancellation.index')->with('success', 'Đã xóa thông tin hủy.');
     }
+
 }
