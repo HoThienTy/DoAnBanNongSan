@@ -157,47 +157,6 @@
                     </table>
                 @endif
 
-
-                <!-- Hiển thị các lô hàng và thêm mã khuyến mãi -->
-                <h3>Quản lý mã khuyến mãi cho lô hàng</h3>
-                @if ($batches->isEmpty())
-                    <p>Không có lô hàng nào.</p>
-                @else
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Mã lô hàng</th>
-                                <th>Ngày Nhập</th>
-                                <th>Số Lượng Sản Phẩm Trong Lô</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($batches as $batch)
-                                <tr>
-                                    <td>{{ $batch->ma_lo_hang }}</td>
-                                    <td>{{ $batch->ngay_nhap }}</td>
-                                    <td>{{ $batch->so_luong }}</td>
-                                    <td>
-                                        <!-- Thêm mã khuyến mãi cho lô hàng -->
-                                        <form
-                                            action="{{ route('admin.promotions.addCouponToBatch', $batch->ma_lo_hang) }}"
-                                            method="POST">
-                                            @csrf
-                                            <div class="input-group mb-2">
-                                                <input type="text" name="coupon_code" class="form-control"
-                                                    placeholder="Mã khuyến mãi" required>
-                                                <button type="submit" class="btn btn-success">Thêm mã</button>
-                                            </div>
-                                        </form>
-
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @endif
-
-
             </div>
         </div>
         <!--**********************************

@@ -163,6 +163,10 @@ Route::prefix('admin/promotions')->name('admin.promotions.')->middleware('auth')
     Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::put('/{id}', [PromotionController::class, 'update'])->name('update')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
     Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+    Route::post('/addCouponToBatch/{batchId}', [PromotionController::class, 'addCouponToBatch'])->name('addCouponToBatch')->middleware(CheckPermission::class . ':Quản lý khuyến mãi');
+
+    Route::delete('/promotions/{batchId}/removeCoupon/{couponId}', [PromotionController::class, 'removeCouponFromBatch'])
+    ->name('removeCouponFromBatch');
 
 });
 Route::delete('/admin/coupons/{id}', [CouponController::class, 'destroy'])->name('coupon.destroy');

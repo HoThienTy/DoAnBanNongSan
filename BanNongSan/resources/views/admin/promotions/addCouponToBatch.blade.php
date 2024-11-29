@@ -89,9 +89,9 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <form action="{{ route('admin.promotions.addCouponToBatch') }}" method="POST">
+                                    <form action="{{ route('admin.promotions.addCouponToBatch', $batch->ma_lo_hang) }}"
+                                        method="POST">
                                         @csrf
-                                        <input type="hidden" name="batch_id" value="{{ $batch->ma_lo_hang }}">
                                         <select name="coupon_code" class="form-control">
                                             <option value="">Chọn Mã Khuyến Mãi</option>
                                             @foreach ($coupons as $coupon)
@@ -102,7 +102,23 @@
                                         </select>
                                         <button type="submit" class="btn btn-success mt-2">Thêm Mã Khuyến Mãi</button>
                                     </form>
+                                    @if ($batch->khuyenMai->isNotEmpty())
+                                        @foreach ($batch->khuyenMai as $coupon)
+                                            {{-- {{ $coupon->ma_khuyen_mai }}<br> --}}
+                                            <!-- Nút xóa mã khuyến mãi khỏi lô hàng -->
+                                            <form
+                                                action="{{ route('admin.promotions.removeCouponFromBatch', ['batchId' => $batch->ma_lo_hang, 'couponId' => $coupon->id]) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Remove Coupon</button>
+                                            </form>
+                                        @endforeach
+                                    @else
+                                         
+                                    @endif
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>
@@ -123,5 +139,99 @@
     ***********************************-->
     @include('layouts.vendor-admin-js')
 </body>
+<style>
+    /* Tăng độ rộng của bảng và làm cho bảng dễ đọc */
+    .table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    /* Nút "Thêm Mã Khuyến Mãi" */
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    /* Nút "Remove Coupon" */
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    /* Cải thiện form chọn mã khuyến mãi */
+    .select-wrapper {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    select.form-control {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    /* Tạo khoảng cách cho các form */
+    form {
+        margin-top: 15px;
+    }
+
+    /* Tăng khoảng cách giữa các ô trong bảng */
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    /* Định dạng cho các thông báo */
+    .alert {
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+
+    .alert-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .alert-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .alert-info {
+        background-color: #17a2b8;
+        color: white;
+    }
+</style>
 
 </html>

@@ -31,6 +31,7 @@ class PromotionController extends Controller
     public function create()
     {
         $products = SanPham::all();
+
         return view('admin.promotions.create', compact('products'));
     }
 
@@ -46,10 +47,8 @@ class PromotionController extends Controller
             'san_pham.*.giam_gia' => 'required|numeric|min:0',
         ]);
 
-        // Tạo chương trình khuyến mãi
         $promotion = ChuongTrinhKhuyenMai::create($request->only('ten_khuyen_mai', 'ngay_bat_dau', 'ngay_ket_thuc', 'mo_ta'));
 
-        // Thêm sản phẩm vào chương trình khuyến mãi
         foreach ($request->san_pham as $item) {
             KhuyenMaiSanPham::create([
                 'ma_khuyen_mai' => $promotion->ma_khuyen_mai,
@@ -65,6 +64,7 @@ class PromotionController extends Controller
     {
         $promotion = ChuongTrinhKhuyenMai::with('sanPhamKhuyenMai.sanPham')->findOrFail($id);
         $products = SanPham::all();
+
         return view('admin.promotions.edit', compact('promotion', 'products'));
     }
 
@@ -82,13 +82,10 @@ class PromotionController extends Controller
             'san_pham.*.giam_gia' => 'required|numeric|min:0',
         ]);
 
-        // Cập nhật chương trình khuyến mãi
         $promotion->update($request->only('ten_khuyen_mai', 'ngay_bat_dau', 'ngay_ket_thuc', 'mo_ta'));
 
-        // Xóa các sản phẩm khuyến mãi cũ
         KhuyenMaiSanPham::where('ma_khuyen_mai', $promotion->ma_khuyen_mai)->delete();
 
-        // Thêm sản phẩm mới vào chương trình khuyến mãi
         foreach ($request->san_pham as $item) {
             KhuyenMaiSanPham::create([
                 'ma_khuyen_mai' => $promotion->ma_khuyen_mai,
@@ -104,73 +101,85 @@ class PromotionController extends Controller
     {
         $promotion = ChuongTrinhKhuyenMai::findOrFail($id);
         $promotion->delete();
+
         return redirect()->route('admin.promotions.index')->with('success', 'Chương trình khuyến mãi đã được xóa');
     }
 
-    // Thêm mã khuyến mãi vào lô hàng
-    public function addCouponToBatch(Request $request)
+    public function addCouponToBatch(Request $request, $batchId)
     {
-        $request->validate([
-            'coupon_code' => 'required|string|exists:ma_khuyen_mai,ma_khuyen_mai',
-            'batch_id' => 'required|exists:lohang,ma_lo_hang',
-        ]);
+        $loHang = LoHang::find($batchId);
 
-        // Tìm mã khuyến mãi và lô hàng
-        $coupon = MaKhuyenMai::where('ma_khuyen_mai', $request->coupon_code)->first();
-        $batch = LoHang::findOrFail($request->batch_id);
-
-        // Kiểm tra tính hợp lệ của mã khuyến mãi
-        if (!$coupon->isValid()) {
-            return redirect()->back()->withErrors(['coupon_code' => 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.']);
+        // Kiểm tra nếu lô hàng không tồn tại
+        if (!$loHang) {
+            return redirect()->route('admin.promotions.index')->with('error', 'Lô hàng không tồn tại.');
         }
 
-        // Kiểm tra xem mã khuyến mãi đã được áp dụng cho lô hàng chưa
-        if ($batch->khuyenMai()->where('ma_khuyen_mai', $coupon->ma_khuyen_mai)->exists()) {
-            return redirect()->back()->withErrors(['coupon_code' => 'Mã khuyến mãi này đã được áp dụng cho lô hàng.']);
+        $couponCode = $request->input('coupon_code');
+        $coupon = MaKhuyenMai::where('ma_khuyen_mai', $couponCode)->first();
+
+        // Kiểm tra mã khuyến mãi hợp lệ
+        if (!$coupon) {
+            return redirect()->route('admin.promotions.index')->with('error', 'Mã khuyến mãi không hợp lệ.');
         }
 
-        // Thêm mã khuyến mãi vào lô hàng
-        $batch->khuyenMai()->attach($coupon->ma_khuyen_mai);
-
-        // Kiểm tra lại số lượng mã khuyến mãi đã được thêm
-        if ($batch->khuyenMai()->count() > 0) {
-            $batch->trang_thai_khuyen_mai = 'Có khuyến mãi';
+        // Kiểm tra xem mã khuyến mãi đã được áp dụng chưa
+        if ($loHang->khuyenMai->contains($coupon->id)) {
+            return redirect()->route('admin.promotions.index')->with('info', 'Mã khuyến mãi đã được áp dụng cho lô hàng này.');
         }
 
-        $batch->save();  // Lưu lại trạng thái lô hàng
+        // Gắn mã khuyến mãi vào lô hàng
+        $loHang->khuyenMai()->attach($coupon->id);
 
-        return redirect()->route('admin.promotions.addCouponToBatchPage')->with('success', 'Mã khuyến mãi đã được thêm vào lô hàng thành công');
+        // Duyệt qua các sản phẩm của lô hàng và gắn mã khuyến mãi vào mỗi sản phẩm
+        // foreach ($loHang->sanPham as $sanPham) {
+        //     // Kiểm tra nếu sanPham là đối tượng hợp lệ và khuyến mãi tồn tại
+        //     if ($sanPham && $sanPham->khuyenMais()->exists()) {
+        //         $sanPham->khuyenMais()->attach($coupon->id, ['giam_gia' => $coupon->giam_gia]);
+        //     }
+        // }
+
+        // Trả về thông báo thành công
+        return redirect()->route('admin.promotions.index')->with('success', 'Mã khuyến mãi đã được thêm vào lô hàng và các sản phẩm.');
     }
+
+
 
     public function addCouponToBatchPage()
     {
-        // Lấy tất cả các mã khuyến mãi
         $coupons = MaKhuyenMai::all();
-
-        // Lấy tất cả các lô hàng và eager load quan hệ khuyến mãi
-        $batches = LoHang::with('khuyenMai')->get();  // Eager load `khuyenMai`
+        $batches = LoHang::with('khuyenMai')->get();
 
         return view('admin.promotions.addCouponToBatch', compact('coupons', 'batches'));
     }
 
-
-
-    public function removeCouponFromBatch($ma_lo_hang, $coupon_id)
+    public function removeCouponFromBatch($batchId, $couponId)
     {
-        $batch = LoHang::findOrFail($ma_lo_hang);
-        $batch->khuyenMai()->detach($coupon_id);
+        // Tìm lô hàng theo ID
+        $loHang = LoHang::find($batchId);
 
-        // Kiểm tra xem lô hàng còn khuyến mãi hay không và cập nhật trạng thái
-        if ($batch->khuyenMai->isEmpty()) {
-            $batch->trang_thai_khuyen_mai = 'Không có';
+        // Kiểm tra nếu lô hàng tồn tại
+        if (!$loHang) {
+            return redirect()->route('admin.promotions.index')->with('error', 'Lô hàng không tồn tại.');
         }
 
+        // Tìm mã khuyến mãi theo ID
+        $coupon = MaKhuyenMai::find($couponId);
 
-        $batch->save();
+        // Kiểm tra nếu mã khuyến mãi tồn tại
+        if (!$coupon) {
+            return redirect()->route('admin.promotions.index')->with('error', 'Mã khuyến mãi không tồn tại.');
+        }
 
-        return redirect()->back()->with('success', 'Mã khuyến mãi đã được xóa khỏi lô hàng.');
+        // Kiểm tra xem mã khuyến mãi có thuộc lô hàng này không
+        if (!$loHang->khuyenMai->contains($coupon->id)) {
+            return redirect()->route('admin.promotions.index')->with('info', 'Mã khuyến mãi này không áp dụng cho lô hàng.');
+        }
+
+        // Xóa mã khuyến mãi khỏi lô hàng
+        $loHang->khuyenMai()->detach($coupon->id);
+
+        // Thông báo thành công
+        return redirect()->route('admin.promotions.index')->with('success', 'Mã khuyến mãi đã được xóa khỏi lô hàng.');
     }
-
-
 
 }
