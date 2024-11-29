@@ -63,6 +63,11 @@
             <!-- row -->
             <div class="container-fluid">
                 <h1>Báo cáo tồn kho</h1>
+                <form action="{{ route('admin.reports.inventory') }}" method="GET">
+                    <input type="text" name="search" placeholder="Tìm kiếm sản phẩm..." class="form-control">
+                    <button type="submit" class="btn btn-primary mt-2">Tìm kiếm</button>
+                </form>
+                
                 <a href="{{ route('admin.reports.inventory.export_excel') }}" class="btn btn-success">Xuất Excel</a>
 
                 <canvas id="inventoryChart" width="400" height="200"></canvas>

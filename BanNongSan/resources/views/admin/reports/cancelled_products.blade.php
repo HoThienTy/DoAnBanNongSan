@@ -63,7 +63,32 @@
             <!-- row -->
             <div class="container-fluid">
                 <h1>Báo cáo hàng hủy tháng {{ $previousMonth->format('m/Y') }}</h1>
-                <a href="{{ route('admin.reports.cancelled_products.export_excel') }}" class="btn btn-success">Xuất Excel</a>
+
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm..."
+                        onkeyup="filterTable()">
+                </div>
+
+                <a href="{{ route('admin.reports.cancelled_products.export_excel') }}" class="btn btn-success">Xuất
+                    Excel</a>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Số Lượng Bị Hủy</th>
+                            <th>% Hủy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($cancelledProducts as $product)
+                            <tr>
+                                <td>{{ $product->TenSanPham }}</td>
+                                <td>{{ $product->TongSoLuongHuy }}</td>
+                                <td>{{ number_format($product->PercentageCancelled, 2) }}%</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
 
                 <h3>Tổng số lượng sản phẩm bị hủy theo từng sản phẩm</h3>
                 <canvas id="productCancellationChart" width="400" height="200"></canvas>
@@ -141,6 +166,89 @@
                 responsive: true
             }
         });
+    </script>
+    <script>
+        // Dữ liệu cho biểu đồ sản phẩm
+        var productLabels = {!! json_encode($cancelledProducts->pluck('TenSanPham')) !!};
+        var productData = {!! json_encode($cancelledProducts->pluck('TongSoLuongHuy')) !!};
+
+        var ctx = document.getElementById('productCancellationChart').getContext('2d');
+        var productChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: productLabels,
+                datasets: [{
+                    label: 'Số lượng bị hủy',
+                    data: productData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255,99,132,1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Dữ liệu cho biểu đồ lý do
+        var reasonLabels = {!! json_encode($cancelledReasons->pluck('ly_do')) !!};
+        var reasonData = {!! json_encode($cancelledReasons->pluck('TongSoLuongHuy')) !!};
+
+        var ctx2 = document.getElementById('reasonCancellationChart').getContext('2d');
+        var reasonChart = new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: reasonLabels,
+                datasets: [{
+                    label: 'Số lượng bị hủy',
+                    data: reasonData,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        // Thêm màu nếu có nhiều lý do
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255,206,86,1)',
+                        'rgba(75,192,192,1)',
+                        // Thêm màu nếu có nhiều lý do
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Hàm lọc bảng khi người dùng nhập vào ô tìm kiếm
+        function filterTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toLowerCase();
+            table = document.getElementById("cancelledProductsTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td");
+                if (td) {
+                    var match = false;
+                    for (var j = 0; j < td.length; j++) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    if (match) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
     </script>
 </body>
 
