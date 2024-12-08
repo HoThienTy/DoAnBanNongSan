@@ -1,8 +1,8 @@
 <table>
     <thead>
-        <tr>
+        {{-- <tr>
             <th colspan="2">Báo cáo doanh thu tháng {{ $currentMonth->format('m/Y') }}</th>
-        </tr>
+        </tr> --}}
         <tr>
             <th>Ngày</th>
             <th>Tổng tiền</th>

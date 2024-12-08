@@ -14,40 +14,68 @@ use Maatwebsite\Excel\Facades\Excel;
 class ReportController extends Controller
 {
     // Báo cáo hàng hủy theo sản phẩm và lý do
-    public function cancelledProductsReport()
+    public function cancelledProductsReport(Request $request)
     {
-        // Tháng trước
-        $previousMonth = Carbon::now()->subMonth();
+        // Lấy tháng/năm từ request hoặc mặc định là tháng hiện tại
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
 
-        // Tổng số lượng sản phẩm bị hủy
+        $selectedDate = Carbon::createFromDate($year, $month, 1);
+
+        // Tính tổng số lượng sản phẩm bị hủy theo từng sản phẩm trong tháng được chọn
         $cancelledProducts = DB::table('huy as h')
             ->join('lohang as lh', 'h.ma_lo_hang', '=', 'lh.ma_lo_hang')
             ->join('sanpham as sp', 'h.ma_san_pham', '=', 'sp.MaSanPham')
-            ->select('sp.TenSanPham', DB::raw('SUM(h.so_luong) as TongSoLuongHuy'))
-            ->whereMonth('h.ngay_huy', '=', $previousMonth->month)
-            ->whereYear('h.ngay_huy', '=', $previousMonth->year)
-            ->groupBy('sp.MaSanPham', 'sp.TenSanPham')
-            ->orderBy('TongSoLuongHuy', 'desc')
+            ->select(
+                'sp.MaSanPham',
+                'sp.TenSanPham',
+                DB::raw('SUM(h.so_luong) as TongSoLuongHuy'),
+                DB::raw("DATE_FORMAT(h.ngay_huy, '%m/%Y') as Thang")
+            )
+            ->whereMonth('h.ngay_huy', '=', $month)
+            ->whereYear('h.ngay_huy', '=', $year)
+            ->groupBy('sp.MaSanPham', 'sp.TenSanPham', 'Thang')
             ->get();
 
-        // Tính tổng số lượng nhập vào để tính tỷ lệ phần trăm
-        $totalQuantity = DB::table('lohang')->sum('so_luong'); // Tổng số lượng sản phẩm nhập
-
-        // Tính phần trăm số lượng hủy so với tổng số lượng
+        // Tính tổng số lượng nhập của từng sản phẩm trong tháng được chọn
         foreach ($cancelledProducts as $product) {
-            $product->PercentageCancelled = ($product->TongSoLuongHuy / $totalQuantity) * 100;
+            $totalImported = DB::table('lohang')
+                ->where('ma_san_pham', $product->MaSanPham)
+                ->whereMonth('ngay_nhap', '=', $month)
+                ->whereYear('ngay_nhap', '=', $year)
+                ->sum('so_luong');
+
+            // Tính phần trăm hủy
+            $product->PhanTramHuy = $totalImported > 0
+                ? round(($product->TongSoLuongHuy / $totalImported) * 100, 2)
+                : 0;
         }
 
-        // Truy vấn lý do hủy sản phẩm từ cột 'ly_do' trong bảng 'huy'
+        // Lấy thống kê lý do hủy
         $cancelledReasons = DB::table('huy as h')
-            ->select('h.ly_do', DB::raw('SUM(h.so_luong) as TongSoLuongHuy'))
-            ->whereMonth('h.ngay_huy', '=', $previousMonth->month)
-            ->whereYear('h.ngay_huy', '=', $previousMonth->year)
-            ->groupBy('h.ly_do')
+            ->select(
+                'h.ly_do',
+                DB::raw('SUM(h.so_luong) as TongSoLuongHuy'),
+                DB::raw("DATE_FORMAT(h.ngay_huy, '%m/%Y') as Thang")
+            )
+            ->whereMonth('h.ngay_huy', '=', $month)
+            ->whereYear('h.ngay_huy', '=', $year)
+            ->groupBy('h.ly_do', 'Thang')
             ->orderBy('TongSoLuongHuy', 'desc')
             ->get();
 
-        return view('admin.reports.cancelled_products', compact('cancelledProducts', 'previousMonth', 'cancelledReasons'));
+        // Lấy danh sách các tháng có dữ liệu để hiển thị trong dropdown
+        $availableMonths = DB::table('huy')
+            ->select(DB::raw("DISTINCT DATE_FORMAT(ngay_huy, '%m/%Y') as Thang"))
+            ->orderBy('ngay_huy', 'desc')
+            ->get();
+
+        return view('admin.reports.cancelled_products', compact(
+            'cancelledProducts',
+            'cancelledReasons',
+            'selectedDate',
+            'availableMonths'
+        ));
     }
 
 

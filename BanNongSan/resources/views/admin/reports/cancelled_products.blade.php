@@ -61,41 +61,79 @@
         ***********************************-->
         <div class="content-body">
             <!-- row -->
+            <!-- Thêm phần này vào file cancelled_products.blade.php -->
             <div class="container-fluid">
-                <h1>Báo cáo hàng hủy tháng {{ $previousMonth->format('m/Y') }}</h1>
+                <h1>Báo cáo hàng hủy</h1>
 
-                <div class="search-container">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm..."
-                        onkeyup="filterTable()">
+                <!-- Form chọn tháng -->
+                <form method="GET" action="{{ route('admin.reports.cancelled_products') }}" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select name="month" class="form-control">
+                                @foreach ($availableMonths as $availableMonth)
+                                    <option
+                                        value="{{ Carbon\Carbon::createFromFormat('m/Y', $availableMonth->Thang)->format('m') }}"
+                                        {{ $selectedDate->format('m') == Carbon\Carbon::createFromFormat('m/Y', $availableMonth->Thang)->format('m') ? 'selected' : '' }}>
+                                        {{ $availableMonth->Thang }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">Xem báo cáo</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Thống kê hủy hàng theo sản phẩm - Tháng {{ $selectedDate->format('m/Y') }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table" id="cancelledProductsTable">
+                            <thead>
+                                <tr>
+                                    <th>Tên Sản Phẩm</th>
+                                    <th>Số Lượng Hủy</th>
+                                    <th>Phần Trăm Hủy</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($cancelledProducts as $product)
+                                    <tr>
+                                        <td>{{ $product->TenSanPham }}</td>
+                                        <td>{{ $product->TongSoLuongHuy }}</td>
+                                        <td>{{ number_format($product->PhanTramHuy, 2) }}%</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <a href="{{ route('admin.reports.cancelled_products.export_excel') }}" class="btn btn-success">Xuất
-                    Excel</a>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Tên Sản Phẩm</th>
-                            <th>Số Lượng Bị Hủy</th>
-                            <th>% Hủy</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($cancelledProducts as $product)
-                            <tr>
-                                <td>{{ $product->TenSanPham }}</td>
-                                <td>{{ $product->TongSoLuongHuy }}</td>
-                                <td>{{ number_format($product->PercentageCancelled, 2) }}%</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                <h3>Tổng số lượng sản phẩm bị hủy theo từng sản phẩm</h3>
-                <canvas id="productCancellationChart" width="400" height="200"></canvas>
-
-                <h3>Thống kê số lượng hàng bị hủy theo từng lý do</h3>
-                <canvas id="reasonCancellationChart" width="400" height="200"></canvas>
-
+                <!-- Biểu đồ thống kê -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Biểu đồ số lượng hủy theo sản phẩm</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="productCancellationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Biểu đồ lý do hủy</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="reasonCancellationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <!--**********************************
