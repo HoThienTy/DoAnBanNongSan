@@ -40,30 +40,78 @@ class CouponController extends Controller
     {
         $request->validate(['coupon_code' => 'required|string']);
 
+        // Kiểm tra giỏ hàng có trống không
+        if (!session()->has('cart') || empty(session('cart'))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Giỏ hàng trống, vui lòng thêm sản phẩm trước khi áp dụng mã giảm giá.'
+            ]);
+        }
+
+        // Tìm mã khuyến mãi
         $coupon = MaKhuyenMai::where('ma_khuyen_mai', $request->coupon_code)
             ->where('trang_thai', 1)
             ->whereDate('ngay_bat_dau', '<=', now())
             ->whereDate('ngay_ket_thuc', '>=', now())
             ->first();
 
+        // Kiểm tra mã khuyến mãi có tồn tại không
         if (!$coupon) {
-            return redirect()->back()->withErrors(['coupon_code' => 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Mã khuyến mãi không tồn tại hoặc đã hết hạn.'
+            ]);
         }
 
+        // Kiểm tra số lần sử dụng
         if ($coupon->so_lan_su_dung >= $coupon->so_lan_khoi_tao) {
-            return redirect()->back()->withErrors(['coupon_code' => 'Mã khuyến mãi đã đạt số lần sử dụng tối đa.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Mã khuyến mãi đã hết lượt sử dụng.'
+            ]);
         }
+
+        // Kiểm tra xem mã đã được áp dụng chưa
+        if (session()->has('coupon')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã có mã khuyến mãi được áp dụng.'
+            ]);
+        }
+
+        // Lưu mã khuyến mãi vào session
+        session(['coupon' => $coupon]);
 
         // Tăng số lần sử dụng
         $coupon->increment('so_lan_su_dung');
 
-        session(['coupon' => $coupon]);
+        // Tính toán lại giá trị giỏ hàng
+        $total = 0;
+        foreach (session('cart') as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+        $discount = ($total * $coupon->giam_gia) / 100;
+        $finalTotal = $total - $discount;
 
-        return redirect()->back()->with('success', 'Mã khuyến mãi đã được áp dụng.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Áp dụng mã khuyến mãi thành công',
+            'coupon' => $coupon,
+            'total' => number_format($total, 0, ',', '.') . ' VNĐ',
+            'discount' => number_format($discount, 0, ',', '.') . ' VNĐ',
+            'finalTotal' => number_format($finalTotal, 0, ',', '.') . ' VNĐ'
+        ]);
     }
 
+    public function remove()
+    {
+        session()->forget('coupon');
 
-
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa mã khuyến mãi'
+        ]);
+    }
 
     public function destroy($id)
     {

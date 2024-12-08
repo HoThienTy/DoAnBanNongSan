@@ -60,43 +60,125 @@
             Content body start
         ***********************************-->
         <div class="content-body">
-            <!-- row -->
             <div class="container-fluid">
-                <h1>Sản phẩm bán chạy nhất tháng {{ $currentMonth->format('m/Y') }}</h1>
-                <div class="search-container">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm..."
-                        onkeyup="filterTable()">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Báo cáo sản phẩm bán chạy</h4>
+                                <div class="d-flex align-items-center">
+                                    <form action="{{ route('admin.reports.best_selling_products') }}" method="GET"
+                                        class="d-flex">
+                                        <select name="month" class="form-control me-2">
+                                            @for ($i = 1; $i <= 12; $i++)
+                                                <option value="{{ $i }}"
+                                                    {{ $selectedDate->month == $i ? 'selected' : '' }}>
+                                                    Tháng {{ $i }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        <select name="year" class="form-control me-2">
+                                            @for ($i = $selectedDate->year - 2; $i <= $selectedDate->year; $i++)
+                                                <option value="{{ $i }}"
+                                                    {{ $selectedDate->year == $i ? 'selected' : '' }}>
+                                                    Năm {{ $i }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        <button type="submit" class="btn btn-primary">Xem</button>
+                                    </form>
+                                    <a href="{{ route('admin.reports.best_selling_products.export_excel') }}"
+                                        class="btn btn-success ms-2">
+                                        Xuất Excel
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body">
+                                                <h5>Tổng số lượng bán</h5>
+                                                <h3>{{ number_format($totalQuantity) }}</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body">
+                                                <h5>Tổng doanh thu</h5>
+                                                <h3>{{ number_format($totalRevenue, 0, ',', '.') }} VNĐ</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Sản phẩm</th>
+                                                <th>Số lượng bán</th>
+                                                <th>% Tổng số lượng</th>
+                                                <th>Doanh thu</th>
+                                                <th>% Tổng doanh thu</th>
+                                                <th>So với tháng trước</th>
+                                                <th>Số đơn hàng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($bestSellingProducts as $product)
+                                                <tr>
+                                                    <td>{{ $product->TenSanPham }}</td>
+                                                    <td>{{ number_format($product->TongSoLuongBan) }}</td>
+                                                    <td>{{ number_format($product->PercentageByQuantity, 1) }}%</td>
+                                                    <td>{{ number_format($product->DoanhThu, 0, ',', '.') }} VNĐ</td>
+                                                    <td>{{ number_format($product->PercentageByRevenue, 1) }}%</td>
+                                                    <td
+                                                        class="{{ $product->PercentageChange >= 0 ? 'text-success' : 'text-danger' }}">
+                                                        {{ number_format($product->PercentageChange, 1) }}%
+                                                    </td>
+                                                    <td>{{ $product->SoDonHang }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <canvas id="bestSellingChart" class="mt-4"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <a href="{{ route('admin.reports.best_selling_products.export_excel') }}" class="btn btn-success">Xuất
-                    Excel</a>
-
-                <table class="table" id="bestSellingTable">
-                    <thead>
-                        <tr>
-                            <th>Tên sản phẩm</th>
-                            <th>Số lượng bán</th>
-                            <th>% Số lượng bán</th>
-                            <th>Doanh thu</th>
-                            <th>% Doanh thu</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($bestSellingProducts as $product)
-                            <tr>
-                                <td>{{ $product->TenSanPham }}</td>
-                                <td>{{ $product->TongSoLuongBan }}</td>
-                                <td class="percentage">{{ number_format($product->PercentageByQuantity, 2) }}%</td>
-                                <td>{{ number_format($product->DoanhThu, 2) }}</td>
-                                <td class="revenue">{{ number_format($product->PercentageByRevenue, 2) }}%</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                <canvas id="bestSellingChart" width="400" height="200"></canvas>
             </div>
         </div>
+
+        @push('scripts')
+            <script>
+                var ctx = document.getElementById('bestSellingChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {!! json_encode($bestSellingProducts->pluck('TenSanPham')) !!},
+                        datasets: [{
+                            label: 'Số lượng bán',
+                            data: {!! json_encode($bestSellingProducts->pluck('TongSoLuongBan')) !!},
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgb(75, 192, 192)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+        @endpush
     </div>
     <!--**********************************
             Content body end

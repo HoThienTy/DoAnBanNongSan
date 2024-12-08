@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChiTietHoaDon;
+use App\Models\HoaDon;
 use App\Models\KhachHang;
+use App\Models\KhoHang;
+use App\Models\LichSuKhoHang;
+use App\Models\LoHang;
+use App\Models\SanPham;
 use Illuminate\Http\Request;
 use App\Models\DonHang;
 use App\Models\ChiTietDonHang;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class CheckOutController extends Controller
@@ -39,118 +46,128 @@ class CheckOutController extends Controller
 
     public function placeOrder(Request $request)
     {
-        // Validate dữ liệu
-        $request->validate([
-            'HoTen' => 'required|max:255',
-            'Email' => 'nullable|email|max:255',
-            'SoDienThoai' => 'required|max:20',
-            'street' => 'required|max:255',
-            'province' => 'required',
-            'district' => 'required',
-            'ward' => 'required',
-            'payment_method' => 'required|in:cod,online',
-        ]);
+        DB::beginTransaction();
+        try {
+            // Validate dữ liệu
+            $request->validate([
+                'HoTen' => 'required|max:255',
+                'Email' => 'nullable|email|max:255',
+                'SoDienThoai' => 'required|max:20',
+                'street' => 'required|max:255',
+                'province' => 'required',
+                'district' => 'required',
+                'ward' => 'required',
+                'payment_method' => 'required|in:cod,online',
+            ]);
 
-        // Lấy tên tỉnh/thành, quận/huyện, phường/xã từ API
-        $provinceCode = $request->input('province');
-        $districtCode = $request->input('district');
-        $wardCode = $request->input('ward');
+            $cart = session()->get('cart', []);
+            if (empty($cart)) {
+                return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống!');
+            }
 
-        // Bạn có thể gọi API để lấy tên đầy đủ
-        $provinceName = $this->getProvinceName($provinceCode);
-        $districtName = $this->getDistrictName($districtCode);
-        $wardName = $this->getWardName($wardCode);
+            // Kiểm tra số lượng tồn kho cho từng sản phẩm
+            foreach ($cart as $MaSanPham => $item) {
+                $product = SanPham::with('loHang')->find($MaSanPham);
+                $totalStock = $product->loHang->sum('so_luong');
 
-        // Ghép địa chỉ đầy đủ
-        $DiaChi = $request->input('street') . ', ' . $wardName . ', ' . $districtName . ', ' . $provinceName;
+                if ($item['quantity'] > $totalStock) {
+                    return redirect()->back()->with(
+                        'error',
+                        "Sản phẩm '{$item['name']}' chỉ còn {$totalStock} sản phẩm trong kho!"
+                    );
+                }
+            }
 
-        $cart = session()->get('cart', []);
-        if (empty($cart)) {
-            return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống!');
-        }
+            // Tính tổng tiền và giảm giá
+            $total = 0;
+            foreach ($cart as $item) {
+                $total += $item['price'] * $item['quantity'];
+            }
 
-        // Tính tổng tiền
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+            // Áp dụng mã giảm giá nếu có
+            $coupon = session('coupon');
+            $discount = 0;
+            if ($coupon) {
+                $discount = ($total * $coupon->giam_gia) / 100;
+            }
 
-        // Kiểm tra mã khuyến mãi
-        $coupon = session('coupon');
-        $discount = 0;
-        if ($coupon) {
-            $discount = ($total * $coupon->giam_gia) / 100;
-        }
+            $finalTotal = $total - $discount;
 
-        $finalTotal = $total - $discount;
+            // Tạo địa chỉ đầy đủ
+            $DiaChi = $request->input('street') . ', ' . $this->getWardName($request->ward) . ', '
+                . $this->getDistrictName($request->district) . ', '
+                . $this->getProvinceName($request->province);
 
-        // Lấy hoặc tạo khách hàng
-        if (Auth::check()) {
-            // Nếu người dùng đã đăng nhập
-            $user = Auth::user();
-            // Giả sử bạn có quan hệ giữa User và KhachHang
-            $khachHang = $user->khachHang;
-            if (!$khachHang) {
-                // Nếu chưa có bản ghi KhachHang, tạo mới
-                $khachHang = KhachHang::create([
-                    'MaNguoiDung' => $user->id, // Hoặc 'MaNguoiDung' tùy theo tên cột của bạn
-                    'TenKhachHang' => $request->HoTen,
-                    'SoDienThoai' => $request->SoDienThoai,
-                    'DiaChi' => $DiaChi, // Sử dụng biến $DiaChi đã xây dựng
-                    // Các cột khác nếu cần
-                ]);
+            // Tạo hoặc cập nhật thông tin khách hàng
+            if (Auth::check()) {
+                $user = Auth::user();
+                $khachHang = $user->khachHang;
+                if (!$khachHang) {
+                    $khachHang = KhachHang::create([
+                        'MaNguoiDung' => $user->MaNguoiDung,
+                        'TenKhachHang' => $request->HoTen,
+                        'SoDienThoai' => $request->SoDienThoai,
+                        'DiaChi' => $DiaChi,
+                    ]);
+                }
             } else {
-                // Cập nhật địa chỉ khách hàng nếu cần
-                $khachHang->update([
+                $khachHang = KhachHang::create([
                     'TenKhachHang' => $request->HoTen,
                     'SoDienThoai' => $request->SoDienThoai,
-                    'DiaChi' => $DiaChi, // Cập nhật địa chỉ
+                    'DiaChi' => $DiaChi,
                 ]);
             }
-        } else {
-            // Nếu người dùng chưa đăng nhập, tạo khách hàng tạm thời
-            $khachHang = KhachHang::create([
-                'TenKhachHang' => $request->HoTen,
-                'SoDienThoai' => $request->SoDienThoai,
-                'DiaChi' => $DiaChi, // Sử dụng biến $DiaChi đã xây dựng
-                // Các cột khác nếu cần
+
+            // Tạo đơn hàng
+            $donHang = HoaDon::create([
+                'ma_khach_hang' => $khachHang->MaKhachHang,
+                'ngay_dat' => now(),
+                'tong_tien' => $finalTotal,
+                'trang_thai' => 'Đang xử lý',
+                'phuong_thuc_thanh_toan' => $request->payment_method,
+                'ma_khuyen_mai' => $coupon ? $coupon->ma_khuyen_mai : null,
+                'giam_gia' => $discount,
             ]);
+
+            // Tạo chi tiết đơn hàng và cập nhật kho
+            foreach ($cart as $MaSanPham => $item) {
+                ChiTietHoaDon::create([
+                    'ma_hoa_don' => $donHang->ma_hoa_don,
+                    'ma_san_pham' => $MaSanPham,
+                    'so_luong' => $item['quantity'],
+                    'don_gia' => $item['price'],
+                    'thanh_tien' => $item['price'] * $item['quantity'],
+                ]);
+
+                // Cập nhật số lượng trong kho theo FIFO
+                $remainingQuantity = $item['quantity'];
+                $loHangs = LoHang::where('ma_san_pham', $MaSanPham)
+                    ->where('so_luong', '>', 0)
+                    ->orderBy('ngay_nhap', 'asc')
+                    ->get();
+
+                foreach ($loHangs as $loHang) {
+                    if ($remainingQuantity <= 0)
+                        break;
+
+                    $quantityToDeduct = min($remainingQuantity, $loHang->so_luong);
+                    $loHang->so_luong -= $quantityToDeduct;
+                    $loHang->save();
+                    $remainingQuantity -= $quantityToDeduct;
+                }
+            }
+
+            DB::commit();
+
+            // Xóa giỏ hàng và mã giảm giá
+            session()->forget(['cart', 'coupon']);
+
+            return redirect()->route('user.checkout.success');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xử lý đơn hàng: ' . $e->getMessage());
         }
-
-        // Lấy mã khách hàng
-        $maKhachHang = $khachHang->MaKhachHang;
-        $phuongThucThanhToan = $request->input('payment_method');
-
-        // Tạo đơn hàng
-        $donHang = DonHang::create([
-            'ma_khach_hang' => $maKhachHang,
-            'ma_nhan_vien' => null,
-            'ngay_dat' => date('Y-m-d'),
-            'tong_tien' => $finalTotal,
-            'trang_thai' => 'Đang xử lý',
-            'phuong_thuc_thanh_toan' => $phuongThucThanhToan,
-            'ma_khuyen_mai' => $coupon ? $coupon->ma_khuyen_mai : null,
-            'giam_gia' => $coupon ? $coupon->giam_gia : 0,
-        ]);
-
-
-        // Lưu chi tiết đơn hàng
-        foreach ($cart as $MaSanPham => $item) {
-            ChiTietDonHang::create([
-                'ma_hoa_don' => $donHang->ma_hoa_don,
-                'ma_san_pham' => $MaSanPham,
-                'so_luong' => $item['quantity'],
-                'don_gia' => $item['price'],
-                'thanh_tien' => $item['price'] * $item['quantity'],
-            ]);
-        }
-
-        // Xóa giỏ hàng
-        session()->forget('cart');
-        // Xóa mã giảm giá khỏi session sau khi thanh toán
-        session()->forget('coupon');
-
-        return redirect()->route('user.checkout.success');
     }
 
     public function success()

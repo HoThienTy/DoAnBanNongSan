@@ -76,7 +76,7 @@
                         <label for="ma_lo_hang">Chọn lô hàng:</label>
                         <select name="ma_lo_hang" id="ma_lo_hang" class="form-control">
                             @foreach($batches as $batch)
-                                <option value="{{ $batch->ma_lo_hang }}">{{ $batch->ma_lo_hang }} - {{ $batch->sanPham->TenSanPham }}</option>
+                                <option value="{{ $batch->ma_lo_hang }}">{{ $batch->ma_lo_hang }} - {{ $batch->sanPham->TenSanPham }} - {{$batch->so_luong}}</option>
                             @endforeach
                         </select>
                     </div>

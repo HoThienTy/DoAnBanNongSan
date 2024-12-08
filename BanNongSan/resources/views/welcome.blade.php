@@ -128,19 +128,23 @@
             </div>
             <div class="row featured__filter">
                 @foreach ($featuredProducts as $product)
-                    <div class="col-lg-3 col-md-4 col-sm-6 mix">
+                    @php
+                        $totalStock = $product->loHang->sum('so_luong');
+                    @endphp
+                    <div class="col-lg-3 col-md-4 col-sm-6 mix {{ $totalStock <= 0 ? 'out-of-stock' : '' }}">
                         <div class="featured__item">
                             <div class="featured__item__pic set-bg"
                                 data-setbg="{{ asset('images/products/' . $product->HinhAnh) }}">
                                 <ul class="featured__item__pic__hover">
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-
-                                    <li>
-                                        <a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
-                                            <i class="fa fa-shopping-cart"></i>
-                                        </a>
-                                    </li>
-
+                                    @if ($totalStock > 0)
+                                        <li>
+                                            <a href="javascript:void(0);"
+                                                onclick="addToCart({{ $product->MaSanPham }}, {{ $totalStock }})">
+                                                <i class="fa fa-shopping-cart"></i>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </div>
                             <div class="featured__item__text">
@@ -148,13 +152,19 @@
                                         href="{{ route('user.product-detail.show', $product->MaSanPham) }}">{{ $product->TenSanPham }}</a>
                                 </h6>
                                 <h5>{{ number_format($product->GiaBan, 0, ',', '.') }} VNĐ</h5>
+                                <p class="stock-info">
+                                    @if ($totalStock > 0)
+                                        <span class="text-success">Còn {{ $totalStock }} sản phẩm</span>
+                                    @else
+                                        <span class="text-danger">Hết hàng</span>
+                                    @endif
+                                </p>
                             </div>
                         </div>
-
-
                     </div>
                 @endforeach
             </div>
+
 
         </div>
     </section>
@@ -189,20 +199,34 @@
                         <div class="latest-product__text">
                             <h4>Sản phẩm mới</h4>
                             <div class="latest-product__slider owl-carousel">
-                                <div class="latest-prdouct__slider__item">
-                                    @foreach ($latestProducts->slice($i * 3, 3) as $product)
-                                        <a href="#" class="latest-product__item">
-                                            <div class="latest-product__item__pic">
-                                                <img src="{{ $product->HinhAnh ? asset('images/products/' . $product->HinhAnh) : asset('images/default.jpg') }}"
-                                                    alt="{{ $product->TenSanPham }}">
-                                            </div>
-                                            <div class="latest-product__item__text">
-                                                <h6>{{ $product->TenSanPham }}</h6>
-                                                <span>{{ number_format($product->GiaBan, 0, ',', '.') }} VNĐ</span>
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                </div>
+                                @foreach ($latestProducts->chunk(3) as $chunk)
+                                    <div class="latest-prdouct__slider__item">
+                                        @foreach ($chunk as $product)
+                                            @php
+                                                $totalStock = $product->loHang->sum('so_luong');
+                                            @endphp
+                                            <a href="{{ route('user.product-detail.show', $product->MaSanPham) }}"
+                                                class="latest-product__item {{ $totalStock <= 0 ? 'out-of-stock' : '' }}">
+                                                <div class="latest-product__item__pic">
+                                                    <img src="{{ $product->HinhAnh ? asset('images/products/' . $product->HinhAnh) : asset('images/default.jpg') }}"
+                                                        alt="{{ $product->TenSanPham }}">
+                                                </div>
+                                                <div class="latest-product__item__text">
+                                                    <h6>{{ $product->TenSanPham }}</h6>
+                                                    <span>{{ number_format($product->GiaBan, 0, ',', '.') }} VNĐ</span>
+                                                    <p class="stock-info">
+                                                        @if ($totalStock > 0)
+                                                            <small class="text-success">Còn {{ $totalStock }} sản
+                                                                phẩm</small>
+                                                        @else
+                                                            <small class="text-danger">Hết hàng</small>
+                                                        @endif
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -279,7 +303,12 @@
     @include('layouts.vendor-js')
 
     <script>
-        function addToCart(MaSanPham) {
+        function addToCart(MaSanPham, stockQuantity) {
+            if (stockQuantity <= 0) {
+                alert('Sản phẩm đã hết hàng!');
+                return;
+            }
+
             fetch(`/cart/add/${MaSanPham}`, {
                     method: 'POST',
                     headers: {
@@ -289,13 +318,14 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Xử lý phản hồi nếu cần, ví dụ: hiển thị thông báo đã thêm vào giỏ hàng
-                    alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
+                    if (data.success) {
+                        alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
+                        window.location.href = '/cart';
+                    } else {
+                        alert(data.message || 'Không thể thêm sản phẩm vào giỏ hàng!');
+                    }
                 })
-                .catch(error => {
-                    console.error('Lỗi khi thêm vào giỏ hàng:', error);
-                });
-            window.location.href = '/cart';
+                window.location.href = '/cart';
 
         }
     </script>
@@ -322,5 +352,33 @@
         });
     </script>
 </body>
+<style>
+    .out-of-stock {
+    opacity: 0.7;
+}
 
+.out-of-stock .featured__item__pic__hover {
+    opacity: 0.5;
+}
+
+.stock-info {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+.text-success {
+    color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.text-danger {
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+</style>
 </html>

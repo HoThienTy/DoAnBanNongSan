@@ -60,15 +60,133 @@
             Content body start
         ***********************************-->
         <div class="content-body">
-            <!-- row -->
             <div class="container-fluid">
-                <h1>Báo cáo doanh thu tháng {{ $currentMonth->format('m/Y') }}</h1>
-                <a href="{{ route('admin.reports.revenue.export_excel') }}" class="btn btn-success">Xuất Excel</a>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Báo cáo doanh thu</h4>
+                                <div class="d-flex align-items-center">
+                                    <form action="{{ route('admin.reports.revenue') }}" method="GET" class="d-flex">
+                                        <select name="month" class="form-control me-2">
+                                            @for ($i = 1; $i <= 12; $i++)
+                                                <option value="{{ $i }}"
+                                                    {{ $selectedDate->month == $i ? 'selected' : '' }}>
+                                                    Tháng {{ $i }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        <select name="year" class="form-control me-2">
+                                            @for ($i = $selectedDate->year - 2; $i <= $selectedDate->year; $i++)
+                                                <option value="{{ $i }}"
+                                                    {{ $selectedDate->year == $i ? 'selected' : '' }}>
+                                                    Năm {{ $i }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        <button type="submit" class="btn btn-primary">Xem</button>
+                                    </form>
+                                    <a href="{{ route('admin.reports.revenue.export_excel') }}"
+                                        class="btn btn-success ms-2">
+                                        Xuất Excel
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body">
+                                                <h5>Tổng doanh thu</h5>
+                                                <h3>{{ number_format($totalRevenue, 0, ',', '.') }} VNĐ</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div
+                                            class="card {{ $percentChange >= 0 ? 'bg-success' : 'bg-danger' }} text-white">
+                                            <div class="card-body">
+                                                <h5>So với tháng trước</h5>
+                                                <h3>{{ number_format($percentChange, 1) }}%</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-info text-white">
+                                            <div class="card-body">
+                                                <h5>Tổng đơn hàng</h5>
+                                                <h3>{{ $totalOrders }}</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <canvas id="revenueChart" width="400" height="200"></canvas>
+                                <canvas id="revenueChart" width="400" height="200"></canvas>
 
+                                <div class="table-responsive mt-4">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Ngày</th>
+                                                <th>Doanh thu</th>
+                                                <th>Số đơn hàng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($revenueData as $data)
+                                                <tr>
+                                                    <td>{{ \Carbon\Carbon::parse($data->Ngay)->format('d/m/Y') }}</td>
+                                                    <td>{{ number_format($data->TongTien, 0, ',', '.') }} VNĐ</td>
+                                                    <td>{{ $data->SoDonHang }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        @push('scripts')
+            <script>
+                var ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {!! json_encode(
+                            $revenueData->pluck('Ngay')->map(function ($date) {
+                                return \Carbon\Carbon::parse($date)->format('d/m');
+                            }),
+                        ) !!},
+                        datasets: [{
+                            label: 'Doanh thu',
+                            data: {!! json_encode($revenueData->pluck('TongTien')) !!},
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        }).format(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
+        @endpush
         <!--**********************************
             Content body end
         ***********************************-->
@@ -84,9 +202,11 @@
     @include('layouts.vendor-admin-js')
 
     <script>
-        var revenueLabels = {!! json_encode($revenueData->pluck('Ngay')->map(function($date) {
-            return \Carbon\Carbon::parse($date)->format('d/m');
-        })) !!};
+        var revenueLabels = {!! json_encode(
+            $revenueData->pluck('Ngay')->map(function ($date) {
+                return \Carbon\Carbon::parse($date)->format('d/m');
+            }),
+        ) !!};
         var revenueData = {!! json_encode($revenueData->pluck('TongTien')) !!};
 
         var ctx = document.getElementById('revenueChart').getContext('2d');
@@ -109,7 +229,10 @@
                     y: {
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
+                                return value.toLocaleString('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                });
                             }
                         }
                     }
@@ -117,7 +240,10 @@
                 tooltips: {
                     callbacks: {
                         label: function(tooltipItem) {
-                            return tooltipItem.yLabel.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
+                            return tooltipItem.yLabel.toLocaleString('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            });
                         }
                     }
                 }

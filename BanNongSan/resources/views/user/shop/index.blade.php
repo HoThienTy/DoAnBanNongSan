@@ -186,6 +186,26 @@
                                 </div>
                             </form>
                         </div>
+
+
+                        <div class="sidebar__item">
+                            <h4>Tình trạng</h4>
+                            <div class="stock-filter">
+                                <form action="{{ route('user.shop.index') }}" method="GET">
+                                    <!-- Giữ lại các tham số tìm kiếm hiện tại -->
+                                    @foreach (request()->except(['in_stock']) as $key => $value)
+                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                    @endforeach
+                                    <label>
+                                        <input type="checkbox" name="in_stock" value="1"
+                                            {{ request('in_stock') ? 'checked' : '' }} onchange="this.form.submit()">
+                                        Chỉ hiển thị sản phẩm còn hàng
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
+
+
                         <div class="sidebar__item sidebar__item__color--option">
                             <h4>Colors</h4>
                             <div class="sidebar__item__color sidebar__item__color--white">
@@ -252,6 +272,7 @@
                             </div>
                         </div>
 
+
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-7">
@@ -280,9 +301,10 @@
                                                         -{{ number_format($giamGia, 0) }}%</div>
                                                     <ul class="product__item__pic__hover">
                                                         <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                                        <li><a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
-                                                            <i class="fa fa-shopping-cart"></i>
-                                                        </a>
+                                                        <li><a href="javascript:void(0);"
+                                                                onclick="addToCart({{ $product->MaSanPham }})">
+                                                                <i class="fa fa-shopping-cart"></i>
+                                                            </a>
                                                         </li>
                                                     </ul>
                                                     <!-- Liên kết tới trang chi tiết sản phẩm -->
@@ -352,9 +374,10 @@
                                         data-setbg="{{ asset('images/products/' . $product->HinhAnh) }}">
                                         <ul class="product__item__pic__hover">
                                             <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                            <li><a href="javascript:void(0);" onclick="addToCart({{ $product->MaSanPham }})">
-                                                <i class="fa fa-shopping-cart"></i>
-                                            </a></li>
+                                            <li><a href="javascript:void(0);"
+                                                    onclick="addToCart({{ $product->MaSanPham }})">
+                                                    <i class="fa fa-shopping-cart"></i>
+                                                </a></li>
                                         </ul>
                                         <!-- Liên kết tới trang chi tiết sản phẩm -->
                                         <a href="{{ route('user.product-detail.show', $product->MaSanPham) }}"
@@ -365,6 +388,16 @@
                                                 href="{{ route('user.product-detail.show', $product->MaSanPham) }}">{{ $product->TenSanPham }}</a>
                                         </h6>
                                         <h5>{{ number_format($product->GiaBan, 0, ',', '.') }} VNĐ</h5>
+                                        <p class="stock-info">
+                                            @php
+                                                $totalStock = $product->loHang->sum('so_luong');
+                                            @endphp
+                                            @if ($totalStock > 0)
+                                                <span class="text-success">Còn {{ $totalStock }} sản phẩm</span>
+                                            @else
+                                                <span class="text-danger">Hết hàng</span>
+                                            @endif
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -485,26 +518,187 @@
         });
     </script>
     <script>
-        function addToCart(MaSanPham) {
+        function addToCart(MaSanPham, stockQuantity) {
+            if (stockQuantity <= 0) {
+                alert('Sản phẩm đã hết hàng!');
+                return;
+            }
+
             fetch(`/cart/add/${MaSanPham}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Xử lý phản hồi nếu cần, ví dụ: hiển thị thông báo đã thêm vào giỏ hàng
-                alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
-            })
-            .catch(error => {
-                console.error('Lỗi khi thêm vào giỏ hàng:', error);
-            });
-            window.location.href = '/cart';
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
+                    window.location.href = '/cart';
+                })
+
+                window.location.href = '/cart';
 
         }
     </script>
 </body>
+<style>
+    /* CSS cho phần hero search */
+    .hero__search__form {
+        width: 100%;
+        height: 50px;
+        border: 1px solid #ebebeb;
+        position: relative;
+        border-radius: 5px;
+    }
+
+    .hero__search__categories {
+        position: relative;
+        padding: 0 30px;
+        cursor: pointer;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        background: #f5f5f5;
+        border-right: 1px solid #ebebeb;
+    }
+
+    .hero__search__categories span {
+        margin-right: 10px;
+    }
+
+    .hero__search__form form {
+        width: 100%;
+        display: flex;
+    }
+
+    .hero__search__form input {
+        width: 100%;
+        border: none;
+        padding-left: 20px;
+        font-size: 15px;
+        color: #333;
+        height: 48px;
+    }
+
+    .hero__search__form button {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+    }
+
+    /* CSS cho phần filter và sidebar */
+    .sidebar {
+        padding: 30px;
+        border-radius: 5px;
+        background: #f5f5f5;
+    }
+
+    .sidebar__item {
+        margin-bottom: 35px;
+    }
+
+    .sidebar__item h4 {
+        color: #1c1c1c;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    .sidebar__item ul li {
+        list-style: none;
+        line-height: 40px;
+    }
+
+    .sidebar__item ul li a {
+        font-size: 16px;
+        color: #666666;
+        line-height: 39px;
+        display: block;
+        transition: all 0.3s;
+    }
+
+    .sidebar__item ul li a:hover {
+        color: #7fad39;
+        padding-left: 10px;
+    }
+
+    /* CSS cho phần price filter */
+    .price-range-wrap {
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .price-input {
+        margin-bottom: 20px;
+    }
+
+    .price-input input {
+        width: 100%;
+        height: 40px;
+        border: 1px solid #ebebeb;
+        border-radius: 5px;
+        padding: 0 15px;
+        margin-bottom: 10px;
+    }
+
+    .filter__sort {
+        padding: 10px;
+        background: #ffffff;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter__sort span {
+        font-size: 16px;
+        color: #6f6f6f;
+        margin-right: 15px;
+    }
+
+    .filter__sort select {
+        border: 1px solid #ebebeb;
+        border-radius: 4px;
+        padding: 5px 10px;
+        min-width: 150px;
+    }
+
+    .stock-info {
+        margin-top: 8px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .text-success {
+        color: #28a745;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .text-danger {
+        color: #dc3545;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .stock-filter {
+        padding: 15px;
+        background: #ffffff;
+        border-radius: 5px;
+    }
+
+    .stock-filter label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+</style>
 
 </html>

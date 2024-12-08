@@ -28,5 +28,5 @@ class KhoHang extends Model
         $this->SoLuongTon = $tongSoLuong;
         $this->save();
     }
-
+    
 }

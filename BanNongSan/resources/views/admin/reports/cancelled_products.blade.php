@@ -206,13 +206,11 @@
                         'rgba(54, 162, 235, 0.5)',
                         'rgba(255, 206, 86, 0.5)',
                         'rgba(75, 192, 192, 0.5)',
-                        // Thêm màu nếu có nhiều lý do
                     ],
                     borderColor: [
                         'rgba(54, 162, 235, 1)',
                         'rgba(255,206,86,1)',
                         'rgba(75,192,192,1)',
-                        // Thêm màu nếu có nhiều lý do
                     ],
                     borderWidth: 1
                 }]
@@ -222,7 +220,6 @@
             }
         });
 
-        // Hàm lọc bảng khi người dùng nhập vào ô tìm kiếm
         function filterTable() {
             var input, filter, table, tr, td, i, txtValue;
             input = document.getElementById("searchInput");

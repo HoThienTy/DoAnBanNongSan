@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class LoHang extends Model
 {
@@ -38,6 +40,13 @@ class LoHang extends Model
         return $this->belongsToMany(MaKhuyenMai::class, 'lohang_ma_khuyen_mai', 'ma_lo_hang', 'ma_khuyen_mai');
     }
 
+    public function up()
+    {
+        Schema::table('lohang', function (Blueprint $table) {
+            $table->string('trang_thai')->default('active'); // active, empty, expired
+        });
+    }
 
+    
 
 }

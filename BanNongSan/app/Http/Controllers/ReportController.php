@@ -53,23 +53,55 @@ class ReportController extends Controller
 
 
     // Báo cáo doanh thu
-    public function revenueReport()
+    public function revenueReport(Request $request)
     {
-        // Tháng này
-        $currentMonth = Carbon::now();
+        // Lấy tháng/năm từ request hoặc sử dụng tháng hiện tại
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+
+        $selectedDate = Carbon::createFromDate($year, $month, 1);
 
         // Dữ liệu doanh thu theo ngày
         $revenueData = DB::table('hoa_don')
-            ->select(DB::raw('DATE(ngay_dat) as Ngay'), DB::raw('SUM(tong_tien) as TongTien'))
-            ->whereMonth('ngay_dat', '=', $currentMonth->month)
-            ->whereYear('ngay_dat', '=', $currentMonth->year)
+            ->select(
+                DB::raw('DATE(ngay_dat) as Ngay'),
+                DB::raw('SUM(tong_tien) as TongTien'),
+                DB::raw('COUNT(*) as SoDonHang')
+            )
+            ->whereMonth('ngay_dat', '=', $month)
+            ->whereYear('ngay_dat', '=', $year)
+            ->where('trang_thai', 'Đã giao')
             ->groupBy('Ngay')
             ->orderBy('Ngay')
             ->get();
 
-        return view('admin.reports.revenue', compact('revenueData', 'currentMonth'));
-    }
+        // Tổng doanh thu trong tháng
+        $totalRevenue = $revenueData->sum('TongTien');
+        $totalOrders = $revenueData->sum('SoDonHang');
 
+        // Lấy doanh thu của tháng trước để so sánh
+        $previousMonth = Carbon::createFromDate($year, $month, 1)->subMonth();
+        $previousMonthRevenue = DB::table('hoa_don')
+            ->whereMonth('ngay_dat', $previousMonth->month)
+            ->whereYear('ngay_dat', $previousMonth->year)
+            ->where('trang_thai', 'Đã giao')
+            ->sum('tong_tien');
+
+        // Tính phần trăm tăng/giảm
+        $percentChange = 0;
+        if ($previousMonthRevenue > 0) {
+            $percentChange = (($totalRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100;
+        }
+
+        return view('admin.reports.revenue', compact(
+            'revenueData',
+            'selectedDate',
+            'totalRevenue',
+            'totalOrders',
+            'previousMonthRevenue',
+            'percentChange'
+        ));
+    }
 
     // Báo cáo tồn kho
     public function inventoryReport(Request $request)
@@ -92,36 +124,72 @@ class ReportController extends Controller
 
 
     // Báo cáo sản phẩm bán chạy
-    public function bestSellingProductsReport()
+    public function bestSellingProductsReport(Request $request)
     {
-        // Tháng này
-        $currentMonth = Carbon::now();
+        // Lấy tháng/năm từ request hoặc sử dụng tháng hiện tại
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+
+        $selectedDate = Carbon::createFromDate($year, $month, 1);
 
         // Dữ liệu sản phẩm bán chạy và doanh thu
         $bestSellingProducts = DB::table('chi_tiet_hoa_don as cthd')
             ->join('sanpham as sp', 'cthd.ma_san_pham', '=', 'sp.MaSanPham')
             ->join('hoa_don as hd', 'cthd.ma_hoa_don', '=', 'hd.ma_hoa_don')
-            ->select('sp.TenSanPham', DB::raw('SUM(cthd.so_luong) as TongSoLuongBan'), DB::raw('SUM(cthd.so_luong * cthd.don_gia) as DoanhThu'))
-            ->whereMonth('hd.ngay_dat', '=', $currentMonth->month)
-            ->whereYear('hd.ngay_dat', '=', $currentMonth->year)
+            ->select(
+                'sp.MaSanPham',
+                'sp.TenSanPham',
+                DB::raw('SUM(cthd.so_luong) as TongSoLuongBan'),
+                DB::raw('SUM(cthd.so_luong * cthd.don_gia) as DoanhThu'),
+                DB::raw('COUNT(DISTINCT hd.ma_hoa_don) as SoDonHang')
+            )
+            ->whereMonth('hd.ngay_dat', '=', $month)
+            ->whereYear('hd.ngay_dat', '=', $year)
+            ->where('hd.trang_thai', 'Đã giao')
             ->groupBy('sp.MaSanPham', 'sp.TenSanPham')
             ->orderBy('TongSoLuongBan', 'desc')
+            ->limit(10)
             ->get();
 
         // Tính tổng số lượng bán và tổng doanh thu
         $totalQuantity = $bestSellingProducts->sum('TongSoLuongBan');
         $totalRevenue = $bestSellingProducts->sum('DoanhThu');
 
-        // Tính tỷ lệ phần trăm giữa số lượng bán và doanh thu
-        foreach ($bestSellingProducts as $product) {
-            // Tính phần trăm theo số lượng bán
-            $product->PercentageByQuantity = ($product->TongSoLuongBan / $totalQuantity) * 100;
+        // So sánh với tháng trước
+        $previousMonth = Carbon::createFromDate($year, $month, 1)->subMonth();
+        $previousMonthData = DB::table('chi_tiet_hoa_don as cthd')
+            ->join('sanpham as sp', 'cthd.ma_san_pham', '=', 'sp.MaSanPham')
+            ->join('hoa_don as hd', 'cthd.ma_hoa_don', '=', 'hd.ma_hoa_don')
+            ->select(
+                'sp.MaSanPham',
+                DB::raw('SUM(cthd.so_luong) as TongSoLuongBan'),
+                DB::raw('SUM(cthd.so_luong * cthd.don_gia) as DoanhThu')
+            )
+            ->whereMonth('hd.ngay_dat', $previousMonth->month)
+            ->whereYear('hd.ngay_dat', $previousMonth->year)
+            ->where('hd.trang_thai', 'Đã giao')
+            ->groupBy('sp.MaSanPham')
+            ->pluck('TongSoLuongBan', 'MaSanPham')
+            ->toArray();
 
-            // Tính phần trăm theo doanh thu
+        // Tính % tăng/giảm cho từng sản phẩm
+        foreach ($bestSellingProducts as $product) {
+            $previousQuantity = $previousMonthData[$product->MaSanPham] ?? 0;
+            $product->PercentageChange = $previousQuantity > 0
+                ? (($product->TongSoLuongBan - $previousQuantity) / $previousQuantity) * 100
+                : 100;
+
+            // Tính % đóng góp
+            $product->PercentageByQuantity = ($product->TongSoLuongBan / $totalQuantity) * 100;
             $product->PercentageByRevenue = ($product->DoanhThu / $totalRevenue) * 100;
         }
 
-        return view('admin.reports.best_selling_products', compact('bestSellingProducts', 'currentMonth'));
+        return view('admin.reports.best_selling_products', compact(
+            'bestSellingProducts',
+            'selectedDate',
+            'totalQuantity',
+            'totalRevenue'
+        ));
     }
 
     public function exportInventoryExcel()

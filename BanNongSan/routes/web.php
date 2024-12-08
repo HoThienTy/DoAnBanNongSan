@@ -44,7 +44,7 @@ Route::get('/product/{MaSanPham}', [ProductController::class, 'show'])->name('us
 
 // Thêm sản phẩm vào giỏ hàng
 Route::post('/cart/add/{MaSanPham}', [CartController::class, 'add'])->name('cart.add');
-
+Route::get('/cart/update-totals', [CartController::class, 'updateTotals'])->name('cart.updateTotals');
 // Hiển thị giỏ hàng
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 

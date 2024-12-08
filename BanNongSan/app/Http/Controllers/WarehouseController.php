@@ -80,7 +80,7 @@ class WarehouseController extends Controller
                 'han_su_dung' => $request->NgayHetHan,
                 'so_luong' => $request->SoLuong,
                 'gia_nhap' => $request->GiaNhap,
-                'trang_thai_khuyen_mai' => null,
+                'ma_khuyen_mai' => null,
             ]);
 
             // Ghi vào lịch sử kho hàng

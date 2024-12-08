@@ -44,10 +44,16 @@ class PromotionController extends Controller
             'mo_ta' => 'nullable|string',
             'san_pham' => 'required|array',
             'san_pham.*.ma_san_pham' => 'required|exists:sanpham,MaSanPham',
-            'san_pham.*.giam_gia' => 'required|numeric|min:0',
+            'san_pham.*.giam_gia' => 'required|numeric|min:0|max:100',
         ]);
 
-        $promotion = ChuongTrinhKhuyenMai::create($request->only('ten_khuyen_mai', 'ngay_bat_dau', 'ngay_ket_thuc', 'mo_ta'));
+        $promotion = ChuongTrinhKhuyenMai::create([
+            'ten_khuyen_mai' => $request->ten_khuyen_mai,
+            'ngay_bat_dau' => $request->ngay_bat_dau,
+            'ngay_ket_thuc' => $request->ngay_ket_thuc,
+            'mo_ta' => $request->mo_ta,
+            'trang_thai' => 'active'
+        ]);
 
         foreach ($request->san_pham as $item) {
             KhuyenMaiSanPham::create([
@@ -57,7 +63,8 @@ class PromotionController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.promotions.index')->with('success', 'Chương trình khuyến mãi đã được thêm thành công');
+        return redirect()->route('admin.promotions.index')
+            ->with('success', 'Chương trình khuyến mãi đã được thêm thành công');
     }
 
     public function edit($id)

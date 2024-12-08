@@ -61,5 +61,8 @@ class SanPham extends Model
         return $this->belongsToMany(ChuongTrinhKhuyenMai::class, 'khuyen_mai_san_pham', 'ma_san_pham', 'ma_khuyen_mai')
                     ->withPivot('giam_gia');
     }
-
+    public function getTotalStockQuantityAttribute()
+    {
+        return $this->loHang->sum('so_luong');
+    }
 }

@@ -100,6 +100,8 @@
                     </div>
                 </div>
 
+                
+
                 <!-- Bảng danh sách kho hàng -->
                 <div id="warehouseTable">
                     @include('admin.warehouse.warehouse_table', ['products' => $products])

@@ -8,36 +8,60 @@ use App\Models\SanPham;
 
 class CartController extends Controller
 {
-    // Hiển thị giỏ hàng
     public function index()
     {
         $cart = session()->get('cart', []);
+        
+        $total = 0;
+        $discount = 0;
+        $finalTotal = 0;
 
-        // Lấy danh sách mã khuyến mãi khả dụng
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+
+        // Lấy mã giảm giá nếu có
+        $coupon = session('coupon');
+        if ($coupon) {
+            $discount = ($total * $coupon->giam_gia) / 100;
+            $finalTotal = $total - $discount;
+        } else {
+            $finalTotal = $total;
+        }
+
         $coupons = MaKhuyenMai::where('trang_thai', 1)
             ->whereDate('ngay_bat_dau', '<=', now())
             ->whereDate('ngay_ket_thuc', '>=', now())
             ->get();
 
-        return view('user.shopping-cart.index', compact('cart', 'coupons'));
+        return view('user.shopping-cart.index', compact('cart', 'coupons', 'total', 'discount', 'finalTotal'));
     }
 
-
-    // Thêm sản phẩm vào giỏ hàng
     public function add(Request $request, $MaSanPham)
     {
-        $product = SanPham::findOrFail($MaSanPham);
-
+        $product = SanPham::with('loHang')->findOrFail($MaSanPham);
         $quantity = $request->input('quantity', 1);
+        $totalStock = $product->loHang->sum('so_luong');
+
+        if ($quantity > $totalStock) {
+            return response()->json([
+                'success' => false,
+                'message' => "Sản phẩm chỉ còn $totalStock trong kho"
+            ]);
+        }
 
         $cart = session()->get('cart', []);
 
-        // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
         if (isset($cart[$MaSanPham])) {
-            // Nếu có, tăng số lượng
-            $cart[$MaSanPham]['quantity'] += $quantity;
+            $newQuantity = $cart[$MaSanPham]['quantity'] + $quantity;
+            if ($newQuantity > $totalStock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Không thể thêm vượt quá số lượng trong kho"
+                ]);
+            }
+            $cart[$MaSanPham]['quantity'] = $newQuantity;
         } else {
-            // Nếu chưa, thêm sản phẩm vào giỏ hàng
             $cart[$MaSanPham] = [
                 "name" => $product->TenSanPham,
                 "quantity" => $quantity,
@@ -46,53 +70,87 @@ class CartController extends Controller
             ];
         }
 
-        // Lưu giỏ hàng vào session
         session()->put('cart', $cart);
-
-        return redirect()->back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã thêm sản phẩm vào giỏ hàng'
+        ]);
     }
 
     public function update(Request $request)
     {
         $cart = session()->get('cart', []);
-
-        if ($cart) {
-            // Cập nhật số lượng cho từng sản phẩm
-            foreach ($request->quantities as $productId => $quantity) {
-                if (isset($cart[$productId])) {
-                    $cart[$productId]['quantity'] = $quantity;
-                }
-            }
-
-            // Lưu lại giỏ hàng đã cập nhật vào session
-            session()->put('cart', $cart);
-
-            if ($request->ajax()) {
-                // Trả về một response JSON nếu là yêu cầu AJAX
-                return response()->json(['success' => true, 'message' => 'Giỏ hàng đã được cập nhật.']);
-            }
-
-            // Nếu không phải AJAX, chuyển hướng lại trang giỏ hàng
-            return redirect()->route('cart.index')->with('success', 'Giỏ hàng đã được cập nhật.');
+        if (!$cart) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Giỏ hàng trống'
+            ]);
         }
 
-        return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống.');
+        foreach ($request->quantities as $productId => $quantity) {
+            $product = SanPham::with('loHang')->find($productId);
+            $totalStock = $product->loHang->sum('so_luong');
+
+            if ($quantity > $totalStock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Sản phẩm {$product->TenSanPham} chỉ còn $totalStock trong kho"
+                ]);
+            }
+
+            if (isset($cart[$productId])) {
+                $cart[$productId]['quantity'] = $quantity;
+            }
+        }
+
+        session()->put('cart', $cart);
+        $this->recalculateCart();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật giỏ hàng thành công'
+        ]);
     }
 
-
-
-    // Xóa sản phẩm khỏi giỏ hàng
     public function remove(Request $request)
     {
-        $MaSanPham = $request->input('MaSanPham');
-
         $cart = session()->get('cart', []);
+        $MaSanPham = $request->input('MaSanPham');
 
         if (isset($cart[$MaSanPham])) {
             unset($cart[$MaSanPham]);
             session()->put('cart', $cart);
+            $this->recalculateCart();
         }
 
-        return redirect()->route('cart.index')->with('success', 'Sản phẩm đã được xóa khỏi giỏ hàng!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa sản phẩm khỏi giỏ hàng'
+        ]);
+    }
+
+    private function recalculateCart()
+    {
+        $cart = session()->get('cart', []);
+        $total = 0;
+        
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+
+        $coupon = session('coupon');
+        if ($coupon) {
+            $discount = ($total * $coupon->giam_gia) / 100;
+            $finalTotal = $total - $discount;
+        } else {
+            $discount = 0;
+            $finalTotal = $total;
+        }
+
+        session()->put('cartTotals', [
+            'total' => $total,
+            'discount' => $discount,
+            'finalTotal' => $finalTotal
+        ]);
     }
 }
