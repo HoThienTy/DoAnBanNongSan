@@ -201,7 +201,7 @@
                             @if (session('coupon'))
                                 <p>Mã giảm giá: {{ session('coupon')->ma_khuyen_mai }} -
                                     {{ session('coupon')->giam_gia }}%</p>
-                                <a href="{{ route('coupon.remove') }}" class="btn btn-danger">Xóa mã khuyến mãi</a>
+                                <a href="{{ route('coupon.remove') }}" class="btn btn-danger remove-coupon">Xóa mã khuyến mãi</a>
                             @endif
                         </div>
 
@@ -332,6 +332,7 @@
                 `);
 
                         alert('Áp dụng mã khuyến mãi thành công!');
+                        location.reload();
                     } else {
                         alert(response.message);
                     }
@@ -348,14 +349,23 @@
         // Xử lý xóa mã khuyến mãi
         $(document).on('click', '.remove-coupon', function(e) {
             e.preventDefault();
+            if (!confirm('Bạn có chắc chắn muốn xóa mã khuyến mãi này?')) {
+                return;
+            }
 
             $.ajax({
                 url: $(this).attr('href'),
                 type: 'GET',
                 success: function(response) {
                     if (response.success) {
-                        location.reload();
+                        alert(response.message);
+                        location.reload(); // Reload trang để hiển thị thông tin cập nhật
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa mã khuyến mãi.');
                     }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi xóa mã khuyến mãi.');
                 }
             });
         });

@@ -123,10 +123,7 @@ class CartController extends Controller
             $this->recalculateCart();
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Đã xóa sản phẩm khỏi giỏ hàng'
-        ]);
+        return redirect()->back()->with('success', 'Đã xóa mã khuyến mãi.');
     }
 
     private function recalculateCart()
