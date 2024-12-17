@@ -14,15 +14,14 @@
                             <!-- Icon -->
                             <span class="ms-2">Profile</span>
                         </a>
-                        <a href="#" class="dropdown-item ai-icon"
-                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <!-- Icon -->
-                            <span class="ms-2">Logout</span>
-                        </a>
-                        <form id="logout-form" action="{{ route('auth.logout') }}" method="POST"
-                            style="display: none;">
-                            @csrf
-                        </form>
+                        <a href="{{ route('auth.logout') }}" class="dropdown-item ai-icon"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                Đăng xuất
+                            </a>
+                            <form id="logout-form" action="{{ route('auth.logout') }}" method="GET"
+                                style="display: none;">
+                                @csrf
+                            </form>
                     </div>
                 @else
                     <a class="nav-link" href="{{ route('auth.login.index') }}">

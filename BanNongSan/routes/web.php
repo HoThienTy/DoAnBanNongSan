@@ -61,7 +61,7 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
 
 // Trang dashboard chính
-Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware(CheckPermission::class . ':Quản trị viên');
 
 // Quản lý sản phẩm
 Route::prefix('admin/products')->name('admin.products.')->group(function () {
